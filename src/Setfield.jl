@@ -4,7 +4,7 @@ module Setfield
 using ArgCheck
 export @set
 
-function setfield_impl(obj, val, field::Symbol)
+function setfield_impl(obj, field::Symbol, val)
     T = obj
     @argcheck field ∈ fieldnames(T)
     fieldvals = map(fieldnames(T)) do fn
@@ -15,11 +15,13 @@ function setfield_impl(obj, val, field::Symbol)
         Expr(:call, T, fieldvals...)
     )
 end
-@generated function setfield(obj, val, ::Val{field}) where {field}
-    setfield_impl(obj,val,field)
+
+@generated function setfield(obj, ::Val{field}, val) where {field}
+    @argcheck field isa Symbol
+    setfield_impl(obj ,field, val)
 end
 
-function setdeepfield_impl(obj, val, path::NTuple{N,Symbol}) where {N}
+function setdeepfield_impl(obj, path::NTuple{N,Symbol}, val) where {N}
     @argcheck N > 0
     @argcheck length(path) > 0
     head = first(path)
@@ -27,32 +29,22 @@ function setdeepfield_impl(obj, val, path::NTuple{N,Symbol}) where {N}
     vtail = QuoteNode(Val{Base.tail(path)}())
     ex = if N == 1
         quote
-            setfield(obj, val, $vhead)
+            setfield(obj, $vhead, val)
         end
     else
         quote
             inner_object = obj.$(first(path))
-            inner = setdeepfield(inner_object, val, $vtail)
-            setfield(obj, inner, $vhead)
+            inner = setdeepfield(inner_object, $vtail, val)
+            setfield(obj, $vhead, inner)
         end
     end
     unshift!(ex.args, Expr(:meta, :inline))
     ex
 end
 
-@generated function setdeepfield(obj, val, ::Val{path}) where {path}
-    setdeepfield_impl(obj, val, path)
-end
-
-dotsplit(s::Symbol) = (s,)
-function dotsplit(ex::Expr)
-    # :(a.b.c) -> (:a, :b, :c)
-    @assert Meta.isexpr(ex, :(.))
-    @assert length(ex.args) == 2
-    front, qlast = ex.args
-    last = unquote(qlast)
-    @assert last isa Symbol
-    tuple(dotsplit(front)..., last)
+@generated function setdeepfield(obj, ::Val{path}, val) where {path}
+    @argcheck path isa Tuple
+    setdeepfield_impl(obj, path, val)
 end
 
 function unquote(ex::QuoteNode)
@@ -64,21 +56,56 @@ function unquote(ex::Expr)
     first(ex.args)
 end
 
-function obj_val_path(ex)
-    # obj_val_path(:(obj.p.a.th = val)) -> (:obj, :val, (:p, :a, :th))
-    @argcheck Meta.isexpr(ex, :(=))
+function destruct_assignment(ex)
+    @argcheck Meta.isexpr(ex, Symbol("="))
     @assert length(ex.args) == 2
-    ex_path, val = ex.args
-    obj_path = dotsplit(ex_path)
-    obj = first(obj_path)
-    path = Base.tail(obj_path)
-    obj, val, path
+    tuple(ex.args...)
 end
 
+function destruct_fieldref(ex)
+    @argcheck Meta.isexpr(ex, Symbol("."))
+    @assert length(ex.args) == 2
+    a, qb = ex.args
+    a, unquote(qb)
+end
+
+function destruct_deepfieldref(s::Symbol)
+    s, ()
+end
+    
+function destruct_deepfieldref(ex)
+    front, last = destruct_fieldref(ex)
+    a, middle = destruct_deepfieldref(front)
+    a, tuple(middle..., last)
+end
+
+function destruct_deepassignment(ex)
+    ref, val = destruct_assignment(ex)
+    obj, path = destruct_deepfieldref(ref)
+    obj, path, val
+end
+
+"""
+    @set assignment
+
+Update deeply nested fields of an immutable object.
+```jldoctest
+julia> struct T; a; b end
+
+julia> t = T(1,T(2,2))
+T(1, T(2, 2))
+
+julia> @set t.a=5
+T(5, T(2, 2))
+
+julia> @set t.b.a = 5
+T(1, T(5, 2))
+```
+"""
 macro set(ex)
-    obj, val, path = obj_val_path(ex)
+    obj, path, val = destruct_deepassignment(ex)
     vpath = QuoteNode(Val{path}())
-    :(Setfield.setdeepfield($(esc(obj)), $(esc(val)), $vpath))
+    :(Setfield.setdeepfield($(esc(obj)), $vpath, $(esc(val))))
 end
 
 end
