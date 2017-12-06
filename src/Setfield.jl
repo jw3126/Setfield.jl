@@ -1,12 +1,18 @@
 __precompile__(true)
 module Setfield
 
-using ArgCheck
 export @set
+
+function check_field_exists(T::Type, field::Symbol)
+    if !(field ∈ fieldnames(T))
+        msg = "$T has no field $field"
+        throw(ArgumentError(msg))
+    end
+end
 
 function setfield_impl(obj, field::Symbol, val)
     T = obj
-    @argcheck field ∈ fieldnames(T)
+    check_field_exists(T, field)
     fieldvals = map(fieldnames(T)) do fn
         fn == field ? :(val) : :(obj.$fn)
     end
@@ -17,14 +23,15 @@ function setfield_impl(obj, field::Symbol, val)
 end
 
 @generated function setfield(obj, ::Val{field}, val) where {field}
-    @argcheck field isa Symbol
+    @assert field isa Symbol
     setfield_impl(obj ,field, val)
 end
 
 function setdeepfield_impl(obj, path::NTuple{N,Symbol}, val) where {N}
-    @argcheck N > 0
-    @argcheck length(path) > 0
+    @assert N > 0
+    @assert length(path) > 0
     head = first(path)
+    check_field_exists(obj, head)
     vhead = QuoteNode(Val{first(path)}())
     vtail = QuoteNode(Val{Base.tail(path)}())
     ex = if N == 1
@@ -33,7 +40,7 @@ function setdeepfield_impl(obj, path::NTuple{N,Symbol}, val) where {N}
         end
     else
         quote
-            inner_object = obj.$(first(path))
+            inner_object = obj.$(head)
             inner = setdeepfield(inner_object, $vtail, val)
             setfield(obj, $vhead, inner)
         end
@@ -43,7 +50,7 @@ function setdeepfield_impl(obj, path::NTuple{N,Symbol}, val) where {N}
 end
 
 @generated function setdeepfield(obj, ::Val{path}, val) where {path}
-    @argcheck path isa Tuple
+    @assert path isa Tuple
     setdeepfield_impl(obj, path, val)
 end
 
@@ -57,13 +64,13 @@ function unquote(ex::Expr)
 end
 
 function destruct_assignment(ex)
-    @argcheck Meta.isexpr(ex, Symbol("="))
+    @assert Meta.isexpr(ex, Symbol("="))
     @assert length(ex.args) == 2
     tuple(ex.args...)
 end
 
 function destruct_fieldref(ex)
-    @argcheck Meta.isexpr(ex, Symbol("."))
+    @assert Meta.isexpr(ex, Symbol("."))
     @assert length(ex.args) == 2
     a, qb = ex.args
     a, unquote(qb)
@@ -105,7 +112,12 @@ T(1, T(5, 2))
 macro set(ex)
     obj, path, val = destruct_deepassignment(ex)
     vpath = QuoteNode(Val{path}())
-    :(Setfield.setdeepfield($(esc(obj)), $vpath, $(esc(val))))
+    quote
+        $(esc(obj)) = Setfield.setdeepfield(
+                                            $(esc(obj)), 
+                                            $vpath, 
+                                            $(esc(val)))
+    end
 end
 
 end
