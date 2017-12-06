@@ -97,16 +97,21 @@ end
 
 Update deeply nested fields of an immutable object.
 ```jldoctest
-julia> struct T; a; b end
+julia> using Setfield
 
-julia> t = T(1,T(2,2))
-T(1, T(2, 2))
+julia> struct T;a;b end
 
-julia> @set t.a=5
-T(5, T(2, 2))
+julia> t = T(1,2)
+T(1, 2)
 
-julia> @set t.b.a = 5
-T(1, T(5, 2))
+julia> @set t.a = 5
+T(5, 2)
+
+julia> @set t.a = T(2,2)
+T(T(2, 2), 2)
+
+julia> @set t.a.b = 3
+T(T(2, 3), 2)
 ```
 """
 macro set(ex)
