@@ -1,7 +1,17 @@
 # Setfield
 
+[![Build Status](https://travis-ci.org/jw3126/Setfield.jl.svg?branch=master)](https://travis-ci.org/jw3126/Setfield.jl)
+[![codecov.io](https://codecov.io/github/jw3126/Setfield.jl/coverage.svg?branch=master)](http://codecov.io/github/jw3126/Setfield.jl?branch=master)
+
+Update deeply nested immutable structs.
+
 ## Usage
 ```julia
+struct T
+    a
+    b
+end
+
 t = T(1,1)
 @set t.a = 5
 # T(5, 2)
