@@ -35,7 +35,7 @@ Oh right, the struct is immutable, so we have to do:
 julia> SpaceShip(Person("JULIA", s.captain.age), s.velocity, s.position)
 SpaceShip(Person(:JULIA, 2009), [0.0, 0.0, 0.0], [0.0, 0.0, 0.0])
 ```
-This is messy and things get worse, if the structs are bigger. `Setfields` to the rescue!
+This is messy and things get worse, if the structs are bigger. `Setfield` to the rescue!
 
 ```julia
 julia> using Setfield
@@ -52,3 +52,7 @@ SpaceShip(Person(:JULIA, 2009), [2.0e6, 0.0, 0.0], [0.0, 0.0, 0.0])
 julia> @set s.position[2] = 20
 SpaceShip(Person(:JULIA, 2009), [2.0e6, 0.0, 0.0], [0.0, 20.0, 0.0])
 ```
+
+## See also
+
+* [Reconstructables.jl](https://github.com/tkf/Reconstructables.jl)
