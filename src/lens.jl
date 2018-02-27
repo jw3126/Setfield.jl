@@ -98,7 +98,6 @@ function assert_hasfield(T, field)
     end
 end
 
-
 @generated function set(l::PropertyLens{field}, obj, val, m::MutationPolicy) where {field}
     T = obj
     M = m
@@ -108,15 +107,6 @@ end
         :(setproperty(obj, Val{field}(), val))
     end
 end
-
-# function setproperty(obj, name, val)
-#     props_new = properties_patched(obj, name, val)
-#     @show name
-#     ret = constructor_of(typeof(obj))(props_new...)
-#     @show ret
-#     ret
-# end
-
 constructor_of(::Type{T}) where {T} = T
 
 @generated function setproperty(obj, ::Val{name}, val) where {name}
@@ -124,6 +114,34 @@ constructor_of(::Type{T}) where {T} = T
     assert_hasfield(T, name)
     args = map(fieldnames(T)) do fn
         fn == name ? :val : Expr(:call, :getproperty, :obj, QuoteNode(fn))
+    end
+    Expr(:block,
+        Expr(:meta, :inline),
+        Expr(:call, :(constructor_of($T)), args...)
+    )
+end
+
+struct FieldLens{fieldname} <: Lens end
+FieldLens(s::Symbol) = FieldLens{s}()
+function get(l::FieldLens{field}, obj) where {field}
+    getfield(obj, s)
+end
+@generated function set(l::FieldLens{field}, obj, val, m::MutationPolicy) where {field}
+    T = obj
+    M = m
+    if T.mutable && (M == EncourageMutation)
+        :(setfield!(obj, field, val); obj)
+    else
+        :(setfield(obj, Val{field}(), val))
+    end
+end
+constructor_of(::Type{T}) where {T} = T
+
+@generated function setfield(obj, ::Val{name}, val) where {name}
+    T = obj
+    assert_hasfield(T, name)
+    args = map(fieldnames(T)) do fn
+        fn == name ? :val : Expr(:call, :getfield, :obj, QuoteNode(fn))
     end
     Expr(:block,
         Expr(:meta, :inline),
