@@ -137,12 +137,20 @@ end
           ((@lens _.a           ),   o1 ),
           ((@lens _.b           ),   o2 ),
           ((@lens _.b.a         ),   o21),
-          ((@lens _.b.a.b[2]    ),   4  ),
           ((@lens _             ),   obj),
         ]
         @inferred get(lens, obj)
         @inferred set(lens, obj, val)
         @inferred modify(identity, lens, obj)
+    end
+    # Broken inferences:
+    for (lens, val) ∈ [
+          ((@lens _.b.a.b[2]    ),   4  ),
+          ((@lens _.b.a.b[end]  ),   4  ),
+        ]
+        @test_throws ErrorException @inferred get(lens, obj)
+        @test_throws ErrorException @inferred set(lens, obj, val)
+        @test_throws ErrorException @inferred modify(identity, lens, obj)
     end
 end
 
@@ -161,6 +169,26 @@ end
     l = @lens _[1]
     @test get(l, obj) == 1
     @test set(l, obj, 6) == (6,2,3)
+
+    l = @lens _[end]
+    @test get(l, [1, 2, 3]) == 3
+
+    l = @lens _[end-1]
+    @test get(l, [1, 2, 3]) == 2
+
+    l = @lens _[end-1][end]
+    @test get(l, [[1, 2, 3], []]) == 3
+
+    l = @lens _[1:end-1]
+    @test get(l, [1, 2, 3]) == [1, 2]
+
+    l = let f() = 1
+        @lens _[end-f()]
+    end
+    @test_broken get(l, [1, 2, 3]) == 2
+
+    l = @lens _[:end]
+    @test get(l, Dict(:end => 1)) == 1
 
 
     l = @lens _[1:3]

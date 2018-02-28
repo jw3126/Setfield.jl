@@ -49,8 +49,13 @@ function parse_obj_lenses(ex::Expr)
     obj, lenses
 end
 
+""" Eval everything but `end`. """
+function partial_eval(x)
+    x  # TODO: implement
+end
+
 function parse_indexlens(ex)
-    index = map(esc, ex.args[2:end])
+    index = map(QuoteNode, ex.args[2:end])
     Expr(:call, :IndexLens,
         Expr(:tuple, index...))
 end
