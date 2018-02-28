@@ -163,11 +163,26 @@ struct IndexLens{I <: Tuple} <: Lens
     indices::I
 end
 
-get(l::IndexLens, obj) = getindex(obj, l.indices...)
-set(l::IndexLens, obj, val, ::ForbidMutation) = Base.setindex(obj, val, l.indices...)
+function preprocess_index(obj, i, k)
+    if i == :end
+        size(obj, k)
+    elseif Meta.isexpr(i, :call) || Meta.isexpr(i, :(:))
+        eval(Expr(i.head, i.args[1],
+                  (preprocess_index(obj, j, k) for j in i.args[2:end])...))
+    else
+        eval(i)
+    end
+end
+
+preprocess_indices(obj, indices) =
+    (preprocess_index(obj, i, k) for (k, i) in enumerate(indices))
+
+get(l::IndexLens, obj) = getindex(obj, preprocess_indices(obj, l.indices)...)
+set(l::IndexLens, obj, val, ::ForbidMutation) =
+    Base.setindex(obj, val, preprocess_indices(obj, l.indices)...)
 function set(l::IndexLens, obj, val, ::EncourageMutation)
     if hassetindex!(obj)
-        setindex!(obj, val, l.indices...)
+        setindex!(obj, val, preprocess_indices(obj, l.indices)...)
     else
         set(l, obj, val, ForbidMutation())
     end
