@@ -49,11 +49,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#Setfield.@set!-Tuple{Any}",
+    "page": "Home",
+    "title": "Setfield.@set!",
+    "category": "macro",
+    "text": "@set! assignment\n\nUpdate deeply nested parts of an object. In contrast to @set, @set! overwrites the variable binding and mutates the original object if possible. \n\njulia> using Setfield\n\njulia> struct T;a;b end\n\njulia> t = T(1,2)\nT(1, 2)\n\njulia> @set! t.a = 5\nT(5, 2)\n\njulia> t\nT(5, 2)\n\njulia> @set t.a = 10\nT(10, 2)\n\njulia> t\nT(5, 2)\n\nWarning\n\nSince @set! rebinds the variable, it will cause type instabilites for updates that change the type.\n\nSee also @set.\n\n\n\n"
+},
+
+{
     "location": "index.html#Setfield.@set-Tuple{Any}",
     "page": "Home",
     "title": "Setfield.@set",
     "category": "macro",
-    "text": "@set assignment\n\nUpdate deeply nested parts of an immutable object.\n\nExample\n\njulia> using Setfield\n\njulia> struct T;a;b end\n\njulia> t = T(1,2)\nT(1, 2)\n\njulia> @set t.a = 5\nT(5, 2)\n\njulia> t\nT(1, 2)\n\njulia> t = @set t.a = T(2,2)\nT(T(2, 2), 2)\n\njulia> @set t.a.b = 3\nT(T(2, 3), 2)\n\n\n\n"
+    "text": "@set assignment\n\nReturn a modified copy of deeply nested objects.\n\nExample\n\njulia> using Setfield\n\njulia> struct T;a;b end\n\njulia> t = T(1,2)\nT(1, 2)\n\njulia> @set t.a = 5\nT(5, 2)\n\njulia> t\nT(1, 2)\n\njulia> t = @set t.a = T(2,2)\nT(T(2, 2), 2)\n\njulia> @set t.a.b = 3\nT(T(2, 3), 2)\n\nSee also @set!.\n\n\n\n"
 },
 
 {
