@@ -3,10 +3,6 @@ module TestSetfield
 using Setfield
 using Base.Test
 
-if Pkg.installed("QuickTypes") != nothing
-    @testset "QuickTypes" begin include("test_quicktypes.jl") end
-end
-
 @testset "core" begin
     include("test_core.jl")
 end
@@ -18,14 +14,16 @@ end
     include("test_settable.jl")
 end
 
-if Pkg.installed("StaticArrays") != nothing
-    @testset "StaticArrays" begin
-        include("test_staticarrays.jl")
-        include("spaceship.jl")
-    end
+@testset "StaticArrays.jl" begin
+    include("test_staticarrays.jl")
 end
 
-@testset "Kwonly" begin
+@testset "Kwonly.jl" begin
     include("test_kwonly.jl")
 end
+
+@testset "QuickTypes.jl" begin
+    include("test_quicktypes.jl")
+end
+
 end  # module
