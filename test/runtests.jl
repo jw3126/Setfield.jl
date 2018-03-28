@@ -25,12 +25,7 @@ if Pkg.installed("StaticArrays") != nothing
     end
 end
 
-try
-    using Reconstructables
+@testset "Kwonly" begin
     include("test_kwonly.jl")
-catch e
-    @assert e isa ArgumentError
-    @assert contains(e.msg, "Reconstructables")
 end
-
 end  # module
