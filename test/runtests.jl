@@ -1,7 +1,12 @@
 module TestSetfield
 
+@static if VERSION < v"0.7-"
+    using Base.Test
+else
+    using Test
+end
+
 using Setfield
-using Base.Test
 
 @testset "core" begin
     include("test_core.jl")
