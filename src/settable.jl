@@ -2,7 +2,12 @@ export @settable
 using MacroTools: prewalk, splitdef, combinedef
 
 macro settable(ex)
-    esc(settable(ex))
+    M = try
+        __module__  # Julia > 0.7-
+    catch
+        current_module()
+    end
+    esc(settable(M, ex))
 end
 
 function arg_type(ex)::Tuple
@@ -96,8 +101,7 @@ function add_posonly_constructor(ex::Expr)::Expr
     end
 end
 
-function settable(code)::Expr
-    M = current_module()
+function settable(M, code)::Expr
     code = macroexpand(M, code)
     MacroTools.postwalk(code) do ex
         ret = if isstructdef(ex)
