@@ -191,8 +191,8 @@ end
         is_deperror07 = VERSION >= v"0.7-" && Base.JLOptions().depwarn == 2
 
         v = randn(3)
-        @test_skip @set! v[:] .= 0
-        @test_skip v == [0,0,0.]
+        # @set! v[:] .= 0  # dot-call not supported
+        @test_broken v == [0,0,0.]
         if is_deperror07
             v[:] .= 1
         else
@@ -205,8 +205,8 @@ end
             v = @test_deprecated07 (@set! v[2:3] = 4; v)
         end
         @test v == [1,4,4]
-        @test_skip @set! v[1:2] .= 5
-        @test_skip v == [5,5,4]
+        # @set! v[1:2] .= 5  # dot-call not supported
+        @test_broken v == [5,5,4]
     end
 
     @testset "@set vs @set!" begin
