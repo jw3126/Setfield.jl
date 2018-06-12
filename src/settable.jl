@@ -2,12 +2,10 @@ export @settable
 using MacroTools: prewalk, splitdef, combinedef
 
 macro settable(ex)
-    M = try
-        __module__  # Julia > 0.7-
-    catch
-        current_module()
+    if VERSION < v"0.7-"
+        __module__ = current_module()
     end
-    esc(settable(M, ex))
+    esc(settable(__module__, ex))
 end
 
 function arg_type(ex)::Tuple
