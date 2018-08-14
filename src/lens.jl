@@ -3,7 +3,7 @@ export @lens
 export set, get, modify
 
 import Base: get
-using Base: setindex, getproperty
+using Base: getproperty
 
 """
     Lens
@@ -146,8 +146,25 @@ struct IndexLens{I <: Tuple} <: Lens
 end
 
 get(l::IndexLens, obj) = getindex(obj, l.indices...)
-set(l::IndexLens, obj, val) = setindex(obj, val, l.indices...)
+set(l::IndexLens, obj, val) = _setindex(obj, val, l.indices...)
 
+@generated function _setindex(obj, val, indices...)
+    if hasmethod(Base.setindex, Tuple{obj, val, indices...})
+        setter = Base.setindex
+    else
+        setter = setindex_on_copy
+    end
+    quote
+        $setter(obj, val, indices...)
+    end
+end
+
+function setindex_on_copy(obj, val, indices...)
+    clone = similar(obj, promote_type(eltype(obj), typeof(val)))
+    copyto!(clone, obj)
+    setindex!(clone, val, indices...)
+    return clone
+end
 
 const NNamedTupleLens{N,s} = NamedTuple{s, T} where {T <: NTuple{N, Lens}}
 struct MultiPropertyLens{L <: NNamedTupleLens} <: Lens
