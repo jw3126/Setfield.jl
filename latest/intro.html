@@ -13,11 +13,11 @@ julia&gt; struct SpaceShip
        end;
 
 julia&gt; s = SpaceShip(Person(:julia, 2009), [0.0, 0.0, 0.0], [0.0, 0.0, 0.0])
-SpaceShip(Person(:julia, 2009), [0.0, 0.0, 0.0], [0.0, 0.0, 0.0])</code></pre><p>Lets update the captains name:</p><pre><code class="language-julia-repl">julia&gt; s.captain.name = &quot;JULIA&quot;
-ERROR: type Person is immutable</code></pre><p>Oh right, the struct is immutable, so we have to do:</p><pre><code class="language-julia-repl">julia&gt; SpaceShip(Person(&quot;JULIA&quot;, s.captain.age), s.velocity, s.position)
+SpaceShip(Person(:julia, 2009), [0.0, 0.0, 0.0], [0.0, 0.0, 0.0])</code></pre><p>Lets update the captains name:</p><pre><code class="language-julia-repl">julia&gt; s.captain.name = :JULIA
+ERROR: type Person is immutable</code></pre><p>It&#39;s a bit cryptic but what it means that Julia tried very hard to set the field but gave it up since the struct is immutable.  So we have to do:</p><pre><code class="language-julia-repl">julia&gt; SpaceShip(Person(:JULIA, s.captain.age), s.velocity, s.position)
 SpaceShip(Person(:JULIA, 2009), [0.0, 0.0, 0.0], [0.0, 0.0, 0.0])</code></pre><p>This is messy and things get worse, if the structs are bigger. <code>Setfields</code> to the rescue!</p><pre><code class="language-julia-repl">julia&gt; using Setfield
 
-julia&gt; s = @set s.captain.name = &quot;JULIA&quot;
+julia&gt; s = @set s.captain.name = :JULIA
 SpaceShip(Person(:JULIA, 2009), [0.0, 0.0, 0.0], [0.0, 0.0, 0.0])
 
 julia&gt; s = @set s.velocity[1] += 999999
@@ -28,6 +28,7 @@ SpaceShip(Person(:JULIA, 2009), [2.0e6, 0.0, 0.0], [0.0, 0.0, 0.0])
 
 julia&gt; @set s.position[2] = 20
 SpaceShip(Person(:JULIA, 2009), [2.0e6, 0.0, 0.0], [0.0, 20.0, 0.0])</code></pre><h2><a class="nav-anchor" id="Under-the-hood-1" href="#Under-the-hood-1">Under the hood</a></h2><p>Under the hood this package implements a simple <a href="https://hackage.haskell.org/package/lens">lens</a> api. This api may be useful in its own rite and works as follows:</p><pre><code class="language-julia-repl">julia&gt; using Setfield
+
 julia&gt; l = @lens _.a.b
 (@lens _.a.b)
 
