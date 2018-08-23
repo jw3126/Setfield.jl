@@ -74,6 +74,9 @@ end
                              (lens_set_ab, hand_set_ab),
                              (lens_set_a_and_b, hand_set_a_and_b)
                             ]
+
+        @assert f_lens(obj, val) == f_hand(obj, val)
+
         b_lens = @benchmark $f_lens($obj, $val)
         b_hand = @benchmark $f_hand($obj, $val)
 
