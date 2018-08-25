@@ -138,7 +138,7 @@ let
             @code_llvm f_lens(args)
             println("hand")
             @code_warntype f_hand(args)
-            @code_hand f_lens(args)
+            @code_llvm f_hand(args)
             test_ir_lens_vs_hand(info_lens, info_hand)
         end
 
