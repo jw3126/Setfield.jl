@@ -112,7 +112,7 @@ function test_ir_lens_vs_hand(info_lens::Core.CodeInfo,
     @test uniquecounts(heads_lens) == uniquecounts(heads_hand)
 end
 
-let
+@testset begin
     obj = AB(AB(1,2), :b)
     val = (1,2)
     @testset "$(setup.lens)" for setup in [

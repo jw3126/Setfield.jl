@@ -4,7 +4,16 @@ using Test
 using Setfield
 
 @testset "Performance" begin
-    include("perf.jl")
+    script = joinpath(@__DIR__, "perf.jl")
+    cmd = ```
+        $(Base.julia_cmd())
+        --color=$(Base.have_color ? "yes" : "no")
+        --startup-file=no
+        --check-bounds=no
+        -O3
+        $script
+    ```
+    @test success(pipeline(cmd; stdout=stdout, stderr=stderr))
 end
 
 @testset "core" begin
