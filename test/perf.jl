@@ -129,16 +129,17 @@ let
 
         @assert f_hand(args) == f_lens(args)
 
+        @testset "IR" begin
+            info_lens, _ = @code_typed f_lens(args)
+            info_hand, _ = @code_typed f_hand(args)
+            test_ir_lens_vs_hand(info_lens, info_hand)
+        end
+
         @testset "benchmark" begin
             b_lens = @benchmarkable $f_lens($args)
             b_hand = @benchmarkable $f_hand($args)
             benchmark_lens_vs_hand(b_lens, b_hand)
         end
 
-        @testset "IR" begin
-            info_lens, _ = @code_typed f_lens(args)
-            info_hand, _ = @code_typed f_hand(args)
-            test_ir_lens_vs_hand(info_lens, info_hand)
-        end
     end
 end
