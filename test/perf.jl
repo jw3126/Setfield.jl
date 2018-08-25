@@ -117,10 +117,10 @@ let
     obj = AB(AB(1,2), :b)
     val = (1,2)
     @testset "$(setup.lens)" for setup in [
-            # (lens=lens_set_a,           hand=hand_set_a,       args=(obj, val)),
-            # (lens=lens_set_a,           hand=hand_set_a,       args=(obj, val)),
-            # (lens=lens_set_ab,          hand=hand_set_ab,      args=(obj, val)),
-            # (lens=lens_set_a_and_b,     hand=hand_set_a_and_b, args=(obj, val)),
+            (lens=lens_set_a,           hand=hand_set_a,       args=(obj, val)),
+            (lens=lens_set_a,           hand=hand_set_a,       args=(obj, val)),
+            (lens=lens_set_ab,          hand=hand_set_ab,      args=(obj, val)),
+            (lens=lens_set_a_and_b,     hand=hand_set_a_and_b, args=(obj, val)),
             (lens=lens_set_i,           hand=hand_set_i,
              args=(@SVector[1,2], 10, 1))
             ]
