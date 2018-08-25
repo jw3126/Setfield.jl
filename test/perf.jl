@@ -44,7 +44,6 @@ function hand_set_i((obj, val, i))
     @inbounds setindex(obj, val, i)
 end
 
-
 function iswin(te_cont::TrialEstimate, te_ref::TrialEstimate)
     # te1 is winner, te2 is looser
     !isloose(te_cont, te_ref)
@@ -69,6 +68,8 @@ function minimax_bench(contender::Benchmark, reference::Benchmark;
         te_ref  = estimator(run(reference))
         push!(tes_contender, te_cont)
         push!(tes_reference, te_ref )
+        # iswin/isloose is not an order. It is only approximately transitive,
+        # since judge allows tolerance.
         sort!(tes_contender, lt=iswin)
         sort!(tes_reference, lt=isloose)
         best_te_cont = first(tes_contender)
@@ -116,10 +117,10 @@ let
     obj = AB(AB(1,2), :b)
     val = (1,2)
     @testset "$(setup.lens)" for setup in [
-            (lens=lens_set_a,           hand=hand_set_a,       args=(obj, val)),
-            (lens=lens_set_a,           hand=hand_set_a,       args=(obj, val)),
-            (lens=lens_set_ab,          hand=hand_set_ab,      args=(obj, val)),
-            (lens=lens_set_a_and_b,     hand=hand_set_a_and_b, args=(obj, val)),
+            # (lens=lens_set_a,           hand=hand_set_a,       args=(obj, val)),
+            # (lens=lens_set_a,           hand=hand_set_a,       args=(obj, val)),
+            # (lens=lens_set_ab,          hand=hand_set_ab,      args=(obj, val)),
+            # (lens=lens_set_a_and_b,     hand=hand_set_a_and_b, args=(obj, val)),
             (lens=lens_set_i,           hand=hand_set_i,
              args=(@SVector[1,2], 10, 1))
             ]
@@ -132,6 +133,12 @@ let
         @testset "IR" begin
             info_lens, _ = @code_typed f_lens(args)
             info_hand, _ = @code_typed f_hand(args)
+            println("lens")
+            @code_warntype f_lens(args)
+            @code_llvm f_lens(args)
+            println("hand")
+            @code_warntype f_hand(args)
+            @code_hand f_lens(args)
             test_ir_lens_vs_hand(info_lens, info_hand)
         end
 
