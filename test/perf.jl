@@ -57,7 +57,7 @@ end
 
 # test that best contender TrialEstimate beats worst reference TrialEstimate
 function minimax_bench(contender::Benchmark, reference::Benchmark;
-        max_runs=5,
+        max_runs=10,
         estimator=minimum,
         kw_judge...)
     tune!(contender)
