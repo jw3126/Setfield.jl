@@ -21,7 +21,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "Under the hood",
     "category": "section",
-    "text": "Under the hood this package implements a simple lens api. This api may be useful in its own rite and works as follows:julia> using Setfield\n\njulia> l = @lens _.a.b\n(@lens _.a.b)\n\njulia> struct AB;a;b;end\n\njulia> obj = AB(AB(1,2),3)\nAB(AB(1, 2), 3)\n\njulia> set(l, obj, 42)\nAB(AB(1, 42), 3)\n\njulia> obj\nAB(AB(1, 2), 3)\n\njulia> get(l, obj)\n2\n\njulia> modify(x->10x,l, obj)\nAB(AB(1, 20), 3)Now the @set macro simply provides sugar for creating a lens and applying it. For instance@set obj.a.b = 42expands roughly tol = @lens _.a.b\nset(l, obj, 42)"
+    "text": "Under the hood this package implements a simple lens api. This api may be useful in its own rite and works as follows:julia> using Setfield\n\njulia> l = @lens _.a.b\n(@lens _.a.b)\n\njulia> struct AB;a;b;end\n\njulia> obj = AB(AB(1,2),3)\nAB(AB(1, 2), 3)\n\njulia> set(obj, l, 42)\nAB(AB(1, 42), 3)\n\njulia> obj\nAB(AB(1, 2), 3)\n\njulia> get(obj, l)\n2\n\njulia> modify(x->10x, obj, l)\nAB(AB(1, 20), 3)Now the @set macro simply provides sugar for creating a lens and applying it. For instance@set obj.a.b = 42expands roughly tol = @lens _.a.b\nset(obj, l, 42)"
 },
 
 {
@@ -37,7 +37,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Docstrings",
     "title": "Setfield.Lens",
     "category": "type",
-    "text": "Lens\n\nA Lens allows to access or replace deeply nested parts of complicated objects.\n\nExample\n\njulia> using Setfield\n\njulia> struct T;a;b; end\n\njulia> t = T(\"AA\", \"BB\")\nT(\"AA\", \"BB\")\n\njulia> l = @lens _.a\n(@lens _.a)\n\njulia> get(l, t)\n\"AA\"\n\njulia> set(l, t, 2)\nT(2, \"BB\")\n\njulia> t\nT(\"AA\", \"BB\")\n\njulia> modify(lowercase, l, t)\nT(\"aa\", \"BB\")\n\nInterface\n\nConcrete subtypes of Lens have to implement\n\nset(lens, obj, val)\nget(lens, obj)\n\nThese must be pure functions, that satisfy the three lens laws:\n\nget(lens, set(lens, obj, val)) == val (You get what you set.)\nset(lens, obj, get(lens, obj)) == obj (Setting what was already there changes nothing.)\nset(lens, set(lens, obj, val1), val2) == set(lens, obj, val2) (The last set wins.)\n\nSee also @lens, set, get, modify.\n\n\n\n\n\n"
+    "text": "Lens\n\nA Lens allows to access or replace deeply nested parts of complicated objects.\n\nExample\n\njulia> using Setfield\n\njulia> struct T;a;b; end\n\njulia> obj = T(\"AA\", \"BB\")\nT(\"AA\", \"BB\")\n\njulia> lens = @lens _.a\n(@lens _.a)\n\njulia> get(obj, lens)\n\"AA\"\n\njulia> set(obj, lens, 2)\nT(2, \"BB\")\n\njulia> obj\nT(\"AA\", \"BB\")\n\njulia> modify(lowercase, obj, lens)\nT(\"aa\", \"BB\")\n\nInterface\n\nConcrete subtypes of Lens have to implement\n\nset(obj, lens, val)\nget(obj, lens)\n\nThese must be pure functions, that satisfy the three lens laws:\n\n@assert get(set(obj, lens, val), lens) == val\n        # You get what you set.\n@assert set(obj, lens, get(obj, lens)) == obj\n        # Setting what was already there changes nothing.\n@assert set(set(obj, lens, val1), lens, val2) == set(obj, lens, val2)\n        # The last set wins.\n\nSee also @lens, set, get, modify.\n\n\n\n\n\n"
 },
 
 {
@@ -45,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Docstrings",
     "title": "Base.get",
     "category": "function",
-    "text": "get(l::Lens, obj)\n\nAccess a deeply nested part of obj. See also Lens.\n\n\n\n\n\n"
+    "text": "get(obj, l::Lens)\n\nAccess a deeply nested part of obj. See also Lens.\n\n\n\n\n\n"
 },
 
 {
@@ -53,7 +53,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Docstrings",
     "title": "Setfield.modify",
     "category": "function",
-    "text": "modify(f, l::Lens, obj)\n\nReplace a deeply nested part x of obj by f(x). See also Lens.\n\n\n\n\n\n"
+    "text": "modify(f, obj, l::Lens)\n\nReplace a deeply nested part x of obj by f(x). See also Lens.\n\n\n\n\n\n"
 },
 
 {
@@ -61,7 +61,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Docstrings",
     "title": "Setfield.set",
     "category": "function",
-    "text": "set(l::Lens, obj, val)\n\nReplace a deeply nested part of obj by val. See also Lens.\n\n\n\n\n\n"
+    "text": "set(obj, l::Lens, val)\n\nReplace a deeply nested part of obj by val. See also Lens.\n\n\n\n\n\n"
 },
 
 {
@@ -69,7 +69,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Docstrings",
     "title": "Setfield.@lens",
     "category": "macro",
-    "text": "@lens\n\nConstruct a lens from a field access.\n\nExample\n\njulia> using Setfield\n\njulia> struct T;a;b;end\n\njulia> t = T(\"A1\", T(T(\"A3\", \"B3\"), \"B2\"))\nT(\"A1\", T(T(\"A3\", \"B3\"), \"B2\"))\n\njulia> l = @lens _.b.a.b\n(@lens _.b.a.b)\n\njulia> get(l, t)\n\"B3\"\n\njulia> set(l, t, 100)\nT(\"A1\", T(T(\"A3\", 100), \"B2\"))\n\njulia> t = (\"one\", \"two\")\n(\"one\", \"two\")\n\njulia> set((@lens _[1]), t, \"1\")\n(\"1\", \"two\")\n\n\n\n\n\n"
+    "text": "@lens\n\nConstruct a lens from a field access.\n\nExample\n\njulia> using Setfield\n\njulia> struct T;a;b;end\n\njulia> t = T(\"A1\", T(T(\"A3\", \"B3\"), \"B2\"))\nT(\"A1\", T(T(\"A3\", \"B3\"), \"B2\"))\n\njulia> l = @lens _.b.a.b\n(@lens _.b.a.b)\n\njulia> get(t, l)\n\"B3\"\n\njulia> set(t, l, 100)\nT(\"A1\", T(T(\"A3\", 100), \"B2\"))\n\njulia> t = (\"one\", \"two\")\n(\"one\", \"two\")\n\njulia> set(t, (@lens _[1]), \"1\")\n(\"1\", \"two\")\n\n\n\n\n\n"
 },
 
 {
@@ -78,6 +78,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Setfield.@set",
     "category": "macro",
     "text": "@set assignment\n\nReturn a modified copy of deeply nested objects.\n\nExample\n\njulia> using Setfield\n\njulia> struct T;a;b end\n\njulia> t = T(1,2)\nT(1, 2)\n\njulia> @set t.a = 5\nT(5, 2)\n\njulia> t\nT(1, 2)\n\njulia> t = @set t.a = T(2,2)\nT(T(2, 2), 2)\n\njulia> @set t.a.b = 3\nT(T(2, 3), 2)\n\n\n\n\n\n"
+},
+
+{
+    "location": "index.html#Base.:∘-Tuple{Lens,Lens}",
+    "page": "Docstrings",
+    "title": "Base.:∘",
+    "category": "method",
+    "text": "lens₁ ∘ lens₂\ncompose([lens₁, [lens₂, [lens₃, ...]]])\n\nCompose lenses lens₁, lens₂, ..., lensₙ to access nested objects.\n\nExample\n\njulia> using Setfield\n\njulia> obj = (a = (b = (c = 1,),),);\n\njulia> la = @lens _.a\n       lb = @lens _.b\n       lc = @lens _.c\n       lens = la ∘ lb ∘ lc\n(@lens _.a.b.c)\n\njulia> get(obj, lens)\n1\n\n\n\n\n\n"
 },
 
 {

@@ -3,23 +3,28 @@
 
 julia&gt; struct T;a;b; end
 
-julia&gt; t = T(&quot;AA&quot;, &quot;BB&quot;)
+julia&gt; obj = T(&quot;AA&quot;, &quot;BB&quot;)
 T(&quot;AA&quot;, &quot;BB&quot;)
 
-julia&gt; l = @lens _.a
+julia&gt; lens = @lens _.a
 (@lens _.a)
 
-julia&gt; get(l, t)
+julia&gt; get(obj, lens)
 &quot;AA&quot;
 
-julia&gt; set(l, t, 2)
+julia&gt; set(obj, lens, 2)
 T(2, &quot;BB&quot;)
 
-julia&gt; t
+julia&gt; obj
 T(&quot;AA&quot;, &quot;BB&quot;)
 
-julia&gt; modify(lowercase, l, t)
-T(&quot;aa&quot;, &quot;BB&quot;)</code></pre><p><strong>Interface</strong></p><p>Concrete subtypes of <code>Lens</code> have to implement</p><ul><li><code>set(lens, obj, val)</code></li><li><code>get(lens, obj)</code></li></ul><p>These must be pure functions, that satisfy the three lens laws:</p><ul><li><code>get(lens, set(lens, obj, val)) == val</code> (You get what you set.)</li><li><code>set(lens, obj, get(lens, obj)) == obj</code> (Setting what was already there changes nothing.)</li><li><code>set(lens, set(lens, obj, val1), val2) == set(lens, obj, val2)</code> (The last set wins.)</li></ul><p>See also <a href="index.html#Setfield.@lens-Tuple{Any}"><code>@lens</code></a>, <a href="index.html#Setfield.set"><code>set</code></a>, <a href="index.html#Base.get"><code>get</code></a>, <a href="index.html#Setfield.modify"><code>modify</code></a>.</p></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/0f98c9ae060dac34b8b34124028d2a7832923c98/src/lens.jl#L8-L49">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Base.get" href="#Base.get"><code>Base.get</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-none">get(l::Lens, obj)</code></pre><p>Access a deeply nested part of <code>obj</code>. See also <a href="index.html#Setfield.Lens"><code>Lens</code></a>.</p></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/0f98c9ae060dac34b8b34124028d2a7832923c98/src/lens.jl#L60-L64">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Setfield.modify" href="#Setfield.modify"><code>Setfield.modify</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-none">modify(f, l::Lens, obj)</code></pre><p>Replace a deeply nested part <code>x</code> of <code>obj</code> by <code>f(x)</code>. See also <a href="index.html#Setfield.Lens"><code>Lens</code></a>.</p></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/0f98c9ae060dac34b8b34124028d2a7832923c98/src/lens.jl#L52-L56">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Setfield.set" href="#Setfield.set"><code>Setfield.set</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-none">set(l::Lens, obj, val)</code></pre><p>Replace a deeply nested part of <code>obj</code> by <code>val</code>. See also <a href="index.html#Setfield.Lens"><code>Lens</code></a>.</p></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/0f98c9ae060dac34b8b34124028d2a7832923c98/src/lens.jl#L67-L71">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Setfield.@lens-Tuple{Any}" href="#Setfield.@lens-Tuple{Any}"><code>Setfield.@lens</code></a> — <span class="docstring-category">Macro</span>.</div><div><div><pre><code class="language-none">@lens</code></pre><p>Construct a lens from a field access.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using Setfield
+julia&gt; modify(lowercase, obj, lens)
+T(&quot;aa&quot;, &quot;BB&quot;)</code></pre><p><strong>Interface</strong></p><p>Concrete subtypes of <code>Lens</code> have to implement</p><ul><li><code>set(obj, lens, val)</code></li><li><code>get(obj, lens)</code></li></ul><p>These must be pure functions, that satisfy the three lens laws:</p><pre><code class="language-julia">@assert get(set(obj, lens, val), lens) == val
+        # You get what you set.
+@assert set(obj, lens, get(obj, lens)) == obj
+        # Setting what was already there changes nothing.
+@assert set(set(obj, lens, val1), lens, val2) == set(obj, lens, val2)
+        # The last set wins.</code></pre><p>See also <a href="index.html#Setfield.@lens-Tuple{Any}"><code>@lens</code></a>, <a href="index.html#Setfield.set"><code>set</code></a>, <a href="index.html#Base.get"><code>get</code></a>, <a href="index.html#Setfield.modify"><code>modify</code></a>.</p></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/eecd7dade92bb099afdc6344c84c2c07ced29ff1/src/lens.jl#L8-L58">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Base.get" href="#Base.get"><code>Base.get</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-none">get(obj, l::Lens)</code></pre><p>Access a deeply nested part of <code>obj</code>. See also <a href="index.html#Setfield.Lens"><code>Lens</code></a>.</p></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/eecd7dade92bb099afdc6344c84c2c07ced29ff1/src/lens.jl#L69-L73">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Setfield.modify" href="#Setfield.modify"><code>Setfield.modify</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-none">modify(f, obj, l::Lens)</code></pre><p>Replace a deeply nested part <code>x</code> of <code>obj</code> by <code>f(x)</code>. See also <a href="index.html#Setfield.Lens"><code>Lens</code></a>.</p></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/eecd7dade92bb099afdc6344c84c2c07ced29ff1/src/lens.jl#L61-L65">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Setfield.set" href="#Setfield.set"><code>Setfield.set</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-none">set(obj, l::Lens, val)</code></pre><p>Replace a deeply nested part of <code>obj</code> by <code>val</code>. See also <a href="index.html#Setfield.Lens"><code>Lens</code></a>.</p></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/eecd7dade92bb099afdc6344c84c2c07ced29ff1/src/lens.jl#L76-L80">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Setfield.@lens-Tuple{Any}" href="#Setfield.@lens-Tuple{Any}"><code>Setfield.@lens</code></a> — <span class="docstring-category">Macro</span>.</div><div><div><pre><code class="language-none">@lens</code></pre><p>Construct a lens from a field access.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using Setfield
 
 julia&gt; struct T;a;b;end
 
@@ -29,17 +34,17 @@ T(&quot;A1&quot;, T(T(&quot;A3&quot;, &quot;B3&quot;), &quot;B2&quot;))
 julia&gt; l = @lens _.b.a.b
 (@lens _.b.a.b)
 
-julia&gt; get(l, t)
+julia&gt; get(t, l)
 &quot;B3&quot;
 
-julia&gt; set(l, t, 100)
+julia&gt; set(t, l, 100)
 T(&quot;A1&quot;, T(T(&quot;A3&quot;, 100), &quot;B2&quot;))
 
 julia&gt; t = (&quot;one&quot;, &quot;two&quot;)
 (&quot;one&quot;, &quot;two&quot;)
 
-julia&gt; set((@lens _[1]), t, &quot;1&quot;)
-(&quot;1&quot;, &quot;two&quot;)</code></pre></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/0f98c9ae060dac34b8b34124028d2a7832923c98/src/sugar.jl#L90-L121">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Setfield.@set-Tuple{Any}" href="#Setfield.@set-Tuple{Any}"><code>Setfield.@set</code></a> — <span class="docstring-category">Macro</span>.</div><div><div><pre><code class="language-none">@set assignment</code></pre><p>Return a modified copy of deeply nested objects.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using Setfield
+julia&gt; set(t, (@lens _[1]), &quot;1&quot;)
+(&quot;1&quot;, &quot;two&quot;)</code></pre></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/eecd7dade92bb099afdc6344c84c2c07ced29ff1/src/sugar.jl#L90-L121">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Setfield.@set-Tuple{Any}" href="#Setfield.@set-Tuple{Any}"><code>Setfield.@set</code></a> — <span class="docstring-category">Macro</span>.</div><div><div><pre><code class="language-none">@set assignment</code></pre><p>Return a modified copy of deeply nested objects.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using Setfield
 
 julia&gt; struct T;a;b end
 
@@ -56,4 +61,16 @@ julia&gt; t = @set t.a = T(2,2)
 T(T(2, 2), 2)
 
 julia&gt; @set t.a.b = 3
-T(T(2, 3), 2)</code></pre></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/0f98c9ae060dac34b8b34124028d2a7832923c98/src/sugar.jl#L4-L30">source</a></section><footer><hr/><a class="previous" href="intro.html"><span class="direction">Previous</span><span class="title">Introduction</span></a></footer></article></body></html>
+T(T(2, 3), 2)</code></pre></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/eecd7dade92bb099afdc6344c84c2c07ced29ff1/src/sugar.jl#L4-L30">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Base.:∘-Tuple{Lens,Lens}" href="#Base.:∘-Tuple{Lens,Lens}"><code>Base.:∘</code></a> — <span class="docstring-category">Method</span>.</div><div><div><pre><code class="language-none">lens₁ ∘ lens₂
+compose([lens₁, [lens₂, [lens₃, ...]]])</code></pre><p>Compose lenses <code>lens₁</code>, <code>lens₂</code>, ..., <code>lensₙ</code> to access nested objects.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using Setfield
+
+julia&gt; obj = (a = (b = (c = 1,),),);
+
+julia&gt; la = @lens _.a
+       lb = @lens _.b
+       lc = @lens _.c
+       lens = la ∘ lb ∘ lc
+(@lens _.a.b.c)
+
+julia&gt; get(obj, lens)
+1</code></pre></div></div><a class="source-link" target="_blank" href="https://github.com/jw3126/Setfield.jl/blob/eecd7dade92bb099afdc6344c84c2c07ced29ff1/src/lens.jl#L160-L181">source</a></section><footer><hr/><a class="previous" href="intro.html"><span class="direction">Previous</span><span class="title">Introduction</span></a></footer></article></body></html>

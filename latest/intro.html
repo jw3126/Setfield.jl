@@ -37,15 +37,15 @@ julia&gt; struct AB;a;b;end
 julia&gt; obj = AB(AB(1,2),3)
 AB(AB(1, 2), 3)
 
-julia&gt; set(l, obj, 42)
+julia&gt; set(obj, l, 42)
 AB(AB(1, 42), 3)
 
 julia&gt; obj
 AB(AB(1, 2), 3)
 
-julia&gt; get(l, obj)
+julia&gt; get(obj, l)
 2
 
-julia&gt; modify(x-&gt;10x,l, obj)
+julia&gt; modify(x-&gt;10x, obj, l)
 AB(AB(1, 20), 3)</code></pre><p>Now the <code>@set</code> macro simply provides sugar for creating a <code>lens</code> and applying it. For instance</p><pre><code class="language-julia">@set obj.a.b = 42</code></pre><p>expands roughly to</p><pre><code class="language-julia">l = @lens _.a.b
-set(l, obj, 42)</code></pre><footer><hr/><a class="next" href="index.html"><span class="direction">Next</span><span class="title">Docstrings</span></a></footer></article></body></html>
+set(obj, l, 42)</code></pre><footer><hr/><a class="next" href="index.html"><span class="direction">Next</span><span class="title">Docstrings</span></a></footer></article></body></html>
