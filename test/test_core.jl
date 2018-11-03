@@ -50,6 +50,22 @@ end
     s = @set t.a /= 2
     @test s === T(1.0,1)
 
+    t = T(1, 2)
+    s = @set t.a <<= 2
+    @test s === T(4, 2)
+
+    t = T(8, 2)
+    s = @set t.a >>= 2
+    @test s === T(2, 2)
+
+    t = T(1, 2)
+    s = @set t.a &= 0
+    @test s === T(0, 2)
+
+    t = T(1, 2)
+    s = @set t.a |= 2
+    @test s === T(3, 2)
+
     t = T((1,2),(3,4))
     @set t.a[1] = 10
     s1 = @set t.a[1] = 10
@@ -202,7 +218,7 @@ end
 struct ABC{A,B,C}
     a::A
     b::B
-    c::C 
+    c::C
 end
 
 @testset "MultiPropertyLens" begin
