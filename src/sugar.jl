@@ -88,7 +88,8 @@ function atset_impl(ex::Expr)
             modify($f, $obj, $lens)
         end
     else
-        error("Unsupported operation $(ex.head)")
+        msg = "Unsupported operation $(ex.head)"
+        throw(ArgumentError(msg))
     end
     ret
 end
