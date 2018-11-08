@@ -1,7 +1,7 @@
 module TestCore
 using Test
 using Setfield
-using Setfield: compose
+using Setfield: compose, get_update_op
 using Setfield.Experimental
 
 struct T
@@ -12,6 +12,13 @@ end
 struct TT{A,B}
     a::A
     b::B
+end
+
+@testset "get_update_op" begin
+    @test get_update_op(Symbol("&=")) === :(&)
+    @test get_update_op(Symbol("^=")) === :(^)
+    @test get_update_op(Symbol("-=")) === :(-)
+    @test get_update_op(Symbol("%=")) === :(%)
 end
 
 @testset "@set" begin

@@ -53,16 +53,11 @@ function parse_obj_lens(ex)
     obj, lens
 end
 
-const UPDATE_OPERATOR_TABLE = Dict(
-    :(+=) => +,
-    :(-=) => -,
-    :(*=) => *,
-    :(/=) => /,
-    :(<<=) => <<,
-    :(>>=) => >>,
-    :(&=) => &,
-    :(|=) => |,
-)
+function get_update_op(sym::Symbol)
+    s = String(sym)
+    @assert endswith(s, '=')
+    Symbol(s[1:end-1])
+end
 
 struct _UpdateOp{OP,V}
     op::OP
@@ -81,15 +76,12 @@ function atset_impl(ex::Expr)
             lens = $lens
             set($obj, lens, $val)
         end
-    elseif haskey(UPDATE_OPERATOR_TABLE, ex.head)
-        op = UPDATE_OPERATOR_TABLE[ex.head]
+    else
+        op = get_update_op(ex.head)
         f = :(_UpdateOp($op,$val))
         quote
             modify($f, $obj, $lens)
         end
-    else
-        msg = "Unsupported operation $(ex.head)"
-        throw(ArgumentError(msg))
     end
     ret
 end
