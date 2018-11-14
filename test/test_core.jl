@@ -15,10 +15,12 @@ struct TT{A,B}
 end
 
 @testset "get_update_op" begin
-    @test get_update_op(Symbol("&=")) === :(&)
-    @test get_update_op(Symbol("^=")) === :(^)
-    @test get_update_op(Symbol("-=")) === :(-)
-    @test get_update_op(Symbol("%=")) === :(%)
+    @test get_update_op(:(&=)) === :(&)
+    @test get_update_op(:(^=)) === :(^)
+    @test get_update_op(:(-=)) === :(-)
+    @test get_update_op(:(%=)) === :(%)
+    @test_throws ArgumentError get_update_op(:(++))
+    @test_throws ArgumentError get_update_op(:(<=))
 end
 
 @testset "@set" begin

@@ -55,7 +55,12 @@ end
 
 function get_update_op(sym::Symbol)
     s = String(sym)
-    @assert endswith(s, '=')
+    if !endswith(s, '=') || isdefined(Base, sym)
+        # 'x +=' etc. is actually 'x = x +', and so '+=' isn't defined in Base.
+        # '>=' however is a function, and not an assignment operator.
+        msg = "Operation $sym doesn't look like an assignment"
+        throw(ArgumentError(msg))
+    end
     Symbol(s[1:end-1])
 end
 
