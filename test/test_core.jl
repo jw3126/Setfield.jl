@@ -105,6 +105,8 @@ struct UserDefinedLens <: Lens end
             (@lens _.a) ∘ UserDefinedLens()
             UserDefinedLens() ∘ (@lens _.b)
             (@lens _.a) ∘ UserDefinedLens() ∘ (@lens _.b)
+            SingletonLens()
+            VCatLens((SingletonLens(), @lens _))
         ]
         buf = IOBuffer()
         show(buf, item)
@@ -154,7 +156,12 @@ end
         test_modify_law(f, lens, obj)
     end
     for (lens, val1, val2) in [
-        ((MultiPropertyLens((a=@lens(_),))), (a=10,), (a=20,))
+        ((MultiPropertyLens((a=@lens(_),))), (a=10,), (a=20,)),
+        (SingletonLens(), [1], [2]),
+        (VCatLens((
+                  (@lens _.a) ∘ SingletonLens(),
+                  (@lens _.b) ∘ SingletonLens()
+                 )),[1,2], [10,20]),
         ]
         test_getset_laws(lens, obj, val1, val2)
         test_modify_law(identity, lens, obj)
@@ -248,6 +255,31 @@ end
     @test set(obj, l_nested, (a=(a=10.0, c="twenty"), b=:thirty)) ==
         TT(ABC(10.0, 2, "twenty"), :thirty)
     @inferred set(obj, l_nested, (a=(a=10.0, c="twenty"), b=:thirty))
+end
+
+@testset "SingletonLens" begin
+    o = T(1,2)
+    l = SingletonLens()
+    @test get(o,l)::AbstractArray == [o]
+    @test set(o,l,[:something]) === :something
+end
+
+@testset "VCatLens" begin
+    l = VCatLens((
+                  (@lens _.a) ∘ SingletonLens(),
+                  (@lens _.b) ∘ SingletonLens(),
+                 ))
+    @test get(T(1,2), l) == [1,2]
+    @test set(T(1,2), l, [10, 20]) == T(10,20)
+
+    l = VCatLens(
+                  (@lens _.a) ∘ SingletonLens(),
+                  (@lens _.b)
+                 )
+    @test get(T(1,[2]), l) == [1,2]
+    t2 = set(T(1,[2,3]), l, [10,20,30])
+    @test t2.a == 10
+    @test t2.b == [20,30]
 end
 
 @testset "type change during @set (default constructor_of)" begin
