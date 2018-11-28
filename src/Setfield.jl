@@ -6,5 +6,5 @@ using MacroTools: isstructdef, splitstructdef
 include("lens.jl")
 include("sugar.jl")
 include("settable.jl")
-include("experimental.jl")
+include("Experimental/experimental.jl")
 end

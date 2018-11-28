@@ -11,6 +11,8 @@ export SingletonLens
 export VCatLens
 export MultiPropertyLens
 
+include("quench.jl")
+
 const NNamedTupleLens{N,s} = NamedTuple{s, T} where {T <: NTuple{N, Lens}}
 struct MultiPropertyLens{L <: NNamedTupleLens} <: Lens
     lenses::L
