@@ -119,7 +119,9 @@ struct UserDefinedLens <: Lens end
     for item in [
             @lens _.a
             @lens _[1]
-            @lens _.a.b[2]
+            @lens _[$1]
+            @lens _[$1, $(1 + 1)]
+            @lens _.a.b[2][$3]
             @lens _
             MultiPropertyLens((a=@lens(_),))
             (@lens _.a[1]) ∘ MultiPropertyLens((b = (@lens _[1]),))
@@ -168,6 +170,8 @@ end
             @lens _.b.a
             @lens _.b.a.b[2]
             @lens _.b.a.b[i]
+            @lens _.b.a.b[$2]
+            @lens _.b.a.b[$i]
             @lens _
         ]
         val1, val2 = randn(2)
@@ -199,6 +203,10 @@ end
           ((@lens _.b.a         ),   o21),
           ((@lens _.b.a.b[2]    ),   4  ),
           ((@lens _.b.a.b[i+1]  ),   4  ),
+          ((@lens _.b.a.b[$2]   ),   4  ),
+          ((@lens _.b.a.b[$(i+1)]),  4  ),
+          ((@lens _.b.a.b[$2]   ),   4.0),
+          ((@lens _.b.a.b[$(i+1)]),  4.0),
           ((@lens _             ),   obj),
           ((@lens _             ),   :xy),
           (MultiPropertyLens((a=(@lens _), b=(@lens _))), (a=1, b=2)),
@@ -227,6 +235,23 @@ end
 
 
     l = @lens _[1:3]
+    @test get([4,5,6,7], l) == [4,5,6]
+end
+
+@testset "ConstIndexLens" begin
+    obj = (1, 2.0, '3')
+    l = @lens _[$1]
+    @test (@inferred get(obj, l)) === 1
+    @test (@inferred set(obj, l, 6.0)) === (6.0, 2.0, '3')
+    l = @lens _[$(1 + 1)]
+    @test (@inferred get(obj, l)) === 2.0
+    @test (@inferred set(obj, l, 6)) === (1, 6, '3')
+    n = 1
+    l = @lens _[$(3n)]
+    @test (@inferred get(obj, l)) === '3'
+    @test (@inferred set(obj, l, 6)) === (1, 2.0, 6)
+
+    l = @lens _[$(1:3)]
     @test get([4,5,6,7], l) == [4,5,6]
 end
 
