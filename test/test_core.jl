@@ -105,6 +105,12 @@ end
     si = @set t.a[i] = 10
     @test s1 === si
 
+    s1 = @set t.a[$1] = 10
+    @test s1 === T((10,2),(3,4))
+    i = 1
+    si = @set t.a[$i] = 10
+    @test s1 === si
+
     t = @set T(1,2).a = 2
     @test t === T(2,2)
 end
