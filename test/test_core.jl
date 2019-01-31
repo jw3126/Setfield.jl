@@ -259,6 +259,26 @@ end
 
     l = @lens _[$(1:3)]
     @test get([4,5,6,7], l) == [4,5,6]
+
+    @testset "complex example (sweeper)" begin
+        sweeper_with_const = (
+            model = (1, 2.0, 3im),
+            axis = (@lens _[$2]),
+        )
+
+        sweeper_with_noconst = @set sweeper_with_const.axis = @lens _[2]
+
+        function f(s)
+            a = sum(set(s.model, s.axis, 0))
+            for i in 1:10
+                a += sum(set(s.model, s.axis, i))
+            end
+            return a
+        end
+
+        @test (@inferred f(sweeper_with_const)) == 66 + 33im
+        @test_broken (@inferred f(sweeper_with_noconst)) == 66 + 33im
+    end
 end
 
 mutable struct M
