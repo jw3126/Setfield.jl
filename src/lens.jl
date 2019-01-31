@@ -222,8 +222,8 @@ julia> get((1, 2.0), @lens _[\$1])
 julia> Base.promote_op(get, typeof.(((1, 2.0), @lens _[\$1]))...)
 Int64
 
-julia> Base.promote_op(get, typeof.(((1, 2.0), @lens _[1]))...)
-Union{Float64, Int64}
+julia> Base.promote_op(get, typeof.(((1, 2.0), @lens _[1]))...) !== Int
+true
 ```
 """
 struct ConstIndexLens{I} <: Lens end
