@@ -223,6 +223,12 @@ end
 Base.@propagate_inbounds function get(obj, l::IndexLens)
     getindex(obj, l.indices...)
 end
+
+Base.@propagate_inbounds function set(obj::Tuple, l::IndexLens, val)
+    setindex(obj, val, l.indices...)
+end
+
+
 Base.@propagate_inbounds function set(obj, l::IndexLens, val)
     setindex!(obj, val, l.indices...)
 end
