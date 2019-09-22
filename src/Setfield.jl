@@ -1,7 +1,8 @@
 __precompile__(true)
 module Setfield
+using GroundEffects
 using MacroTools
-using MacroTools: isstructdef, splitstructdef
+using MacroTools: isstructdef, splitstructdef, postwalk
 
 include("lens.jl")
 include("sugar.jl")

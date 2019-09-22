@@ -52,6 +52,17 @@ end
 
 is_interpolation(x) = x isa Expr && x.head == :$
 
+foldtree(op, init, x) = op(init, x)
+foldtree(op, init, ex::Expr) =
+    op(foldl((acc, x) -> foldtree(op, acc, x), ex.args; init=init), ex)
+
+need_dynamic_lens(ex) =
+    foldtree(false, ex) do yes, x
+        yes || x === :end || x === :_
+    end
+
+replace_underscore(ex, to) = postwalk(x -> x === :_ ? to : x, ex)
+
 function parse_obj_lenses(ex)
     if @capture(ex, front_[indices__])
         obj, frontlens = parse_obj_lenses(front)
@@ -63,6 +74,14 @@ function parse_obj_lenses(ex)
             end
             index = esc(Expr(:tuple, [x.args[1] for x in indices]...))
             lens = :(ConstIndexLens{$index}())
+        elseif obj == esc(:_) && any(need_dynamic_lens, indices)
+            @gensym collection
+            indices = replace_underscore.(indices, collection)
+            lex = GroundEffects.lower(:($collection[$(indices...)]))
+            @assert lex.args[1] == getindex
+            @assert lex.args[2] == collection
+            lindices = esc.(lex.args[3:end])
+            lens = :(DynamicIndexLens($(esc(collection)) -> ($(lindices...),)))
         else
             index = esc(Expr(:tuple, indices...))
             lens = :(IndexLens($index))
