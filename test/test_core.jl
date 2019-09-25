@@ -337,6 +337,12 @@ end
     @test obj2 === TT(2, :three)
 end
 
+@testset "types that do not change parameter via constructor_of" begin
+    @test constructor_of(typeof(@lens _.a))() === @lens _.a
+    @test constructor_of(typeof(@lens _[$1]))() === @lens _[$1]
+    @test constructor_of(typeof(@lens eltype(_)))() === @lens eltype(_)
+end
+
 # https://github.com/tkf/Reconstructables.jl#how-to-use-type-parameters
 struct B{T, X, Y}
     x::X
