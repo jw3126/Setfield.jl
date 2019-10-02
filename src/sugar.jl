@@ -74,7 +74,7 @@ function parse_obj_lenses(ex)
             end
             index = esc(Expr(:tuple, [x.args[1] for x in indices]...))
             lens = :(ConstIndexLens{$index}())
-        elseif obj == esc(:_) && any(need_dynamic_lens, indices)
+        elseif any(need_dynamic_lens, indices)
             @gensym collection
             indices = replace_underscore.(indices, collection)
             lex = Lowering.lower(:($collection[$(indices...)]))
