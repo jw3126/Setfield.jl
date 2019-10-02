@@ -77,7 +77,7 @@ function parse_obj_lenses(ex)
         elseif obj == esc(:_) && any(need_dynamic_lens, indices)
             @gensym collection
             indices = replace_underscore.(indices, collection)
-            lex = GroundEffects.lower(:($collection[$(indices...)]))
+            lex = Lowering.lower(:($collection[$(indices...)]))
             @assert lex.args[1] == getindex
             @assert lex.args[2] == collection
             lindices = esc.(lex.args[3:end])
