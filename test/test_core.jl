@@ -104,6 +104,10 @@ end
     i = 1
     si = @set t.a[i] = 10
     @test s1 === si
+    se = @set t.a[end] = 20
+    @test se === T((1,20),(3,4))
+    se1 = @set t.a[end-1] = 10
+    @test s1 === se1
 
     s1 = @set t.a[$1] = 10
     @test s1 === T((10,2),(3,4))
@@ -255,6 +259,18 @@ end
 
     l = @lens _[1:3]
     @test get([4,5,6,7], l) == [4,5,6]
+end
+
+@testset "DynamicIndexLens" begin
+    l = @lens _[end]
+    obj = (1,2,3)
+    @test get(obj, l) == 3
+    @test set(obj, l, true) == (1,2,true)
+
+    l = @lens _[end÷2]
+    obj = (1,2,3)
+    @test get(obj, l) == 1
+    @test set(obj, l, true) == (true,2,3)
 end
 
 @testset "ConstIndexLens" begin
