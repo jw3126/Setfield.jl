@@ -3,7 +3,6 @@ module Setfield
 using MacroTools
 using MacroTools: isstructdef, splitstructdef, postwalk
 
-include("lowering.jl")
 include("lens.jl")
 include("sugar.jl")
 include("functionlenses.jl")

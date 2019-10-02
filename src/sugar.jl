@@ -63,6 +63,15 @@ need_dynamic_lens(ex) =
 
 replace_underscore(ex, to) = postwalk(x -> x === :_ ? to : x, ex)
 
+function lower_index(collection::Symbol, index)
+    if isexpr(index, :call)
+        return Expr(:call, lower_index.(collection, index.args)...)
+    elseif index === :end
+        return :($(Base.lastindex)($collection))
+    end
+    return index
+end
+
 function parse_obj_lenses(ex)
     if @capture(ex, front_[indices__])
         obj, frontlens = parse_obj_lenses(front)
@@ -77,10 +86,7 @@ function parse_obj_lenses(ex)
         elseif any(need_dynamic_lens, indices)
             @gensym collection
             indices = replace_underscore.(indices, collection)
-            lex = Lowering.lower(:($collection[$(indices...)]))
-            @assert lex.args[1] == getindex
-            @assert lex.args[2] == collection
-            lindices = esc.(lex.args[3:end])
+            lindices = esc.(lower_index.(collection, indices))
             lens = :(DynamicIndexLens($(esc(collection)) -> ($(lindices...),)))
         else
             index = esc(Expr(:tuple, indices...))
