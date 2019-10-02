@@ -2,11 +2,11 @@ module Lowering
 
 using Base.Meta: isexpr
 
-"""
+#=
     lower(ex)
 
 A modified version of `GroundEffects.lower` that only handles indexing.
-"""
+=#
 lower(ex) = something(handle_ref(lower, ex), ex)
 
 function handle_ref(lower, ex)
