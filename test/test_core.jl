@@ -195,6 +195,8 @@ end
             @lens _.b.a.b[i]
             @lens _.b.a.b[$2]
             @lens _.b.a.b[$i]
+            @lens _.b.a.b[end]
+            @lens _.b.a.b[identity(end) - 1]
             @lens _
         ]
         val1, val2 = randn(2)
@@ -230,6 +232,8 @@ end
           ((@lens _.b.a.b[$(i+1)]),  4  ),
           ((@lens _.b.a.b[$2]   ),   4.0),
           ((@lens _.b.a.b[$(i+1)]),  4.0),
+          ((@lens _.b.a.b[end]),     4.0),
+          ((@lens _.b.a.b[end÷2+1]), 4.0),
           ((@lens _             ),   obj),
           ((@lens _             ),   :xy),
           (MultiPropertyLens((a=(@lens _), b=(@lens _))), (a=1, b=2)),
@@ -271,6 +275,13 @@ end
     obj = (1,2,3)
     @test get(obj, l) == 1
     @test set(obj, l, true) == (true,2,3)
+
+    two = 2
+    plusone(x) = x + 1
+    l = @lens _.a[plusone(end) - two].b
+    obj = (a=(1, (a=10, b=20), 3), b=4)
+    @test get(obj, l) == 20
+    @test set(obj, l, true) == (a=(1, (a=10, b=true), 3), b=4)
 end
 
 @testset "ConstIndexLens" begin
