@@ -246,32 +246,39 @@ end
 
 @testset "IndexLens" begin
     l = @lens _[]
+    @test l isa Setfield.IndexLens
     x = randn()
     obj = Ref(x)
     @test get(obj, l) == x
 
     l = @lens _[][]
+    @test l.outer isa Setfield.IndexLens
+    @test l.inner isa Setfield.IndexLens
     inner = Ref(x)
     obj = Base.RefValue{typeof(inner)}(inner)
     @test get(obj, l) == x
 
     obj = (1,2,3)
     l = @lens _[1]
+    @test l isa Setfield.IndexLens
     @test get(obj, l) == 1
     @test set(obj, l, 6) == (6,2,3)
 
 
     l = @lens _[1:3]
+    @test l isa Setfield.IndexLens
     @test get([4,5,6,7], l) == [4,5,6]
 end
 
 @testset "DynamicIndexLens" begin
     l = @lens _[end]
+    @test l isa Setfield.DynamicIndexLens
     obj = (1,2,3)
     @test get(obj, l) == 3
     @test set(obj, l, true) == (1,2,true)
 
     l = @lens _[end÷2]
+    @test l isa Setfield.DynamicIndexLens
     obj = (1,2,3)
     @test get(obj, l) == 1
     @test set(obj, l, true) == (true,2,3)
