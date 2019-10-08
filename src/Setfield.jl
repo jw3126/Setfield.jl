@@ -1,7 +1,8 @@
 __precompile__(true)
 module Setfield
 using MacroTools
-using MacroTools: isstructdef, splitstructdef, postwalk
+using MacroTools: isstructdef, splitstructdef
+using BangBang: setproperty!!, setindex!!
 
 include("lens.jl")
 include("sugar.jl")

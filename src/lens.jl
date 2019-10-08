@@ -84,6 +84,11 @@ Replace a deeply nested part of `obj` by `val`. See also [`Lens`](@ref).
 """
 function set end
 
+abstract type BangStyle end
+struct NoBang <: BangStyle end
+struct OneBang <: BangStyle end
+struct TwoBang <: BangStyle end
+
 @inline function modify(f, obj, l::Lens)
     old_val = get(obj, l)
     new_val = f(old_val)
@@ -95,8 +100,10 @@ get(obj, ::IdentityLens) = obj
 set(obj, ::IdentityLens, val) = val
 
 struct PropertyLens{fieldname} <: Lens end
+struct PropertyLens!{fieldname} <: Lens end
+struct PropertyLens!!{fieldname} <: Lens end
 
-function get(obj, l::PropertyLens{field}) where {field}
+function get(obj, l::Union{PropertyLens{field}, PropertyLens!{field}, PropertyLens!!{field}}) where {field}
     getproperty(obj, field)
 end
 
@@ -106,6 +113,9 @@ end
         :(setproperties(obj, ($field=val,)))
        )
 end
+@inline set(obj, l::PropertyLens!{field}, val) where {field} = setproperty!(obj, field, val)
+@inline set(obj, l::PropertyLens!!{field}, val) where {field} = setproperty!!(obj, field, val)
+
 
 struct ComposedLens{LO, LI} <: Lens
     outer::LO
@@ -162,12 +172,25 @@ end
 struct IndexLens{I <: Tuple} <: Lens
     indices::I
 end
+struct IndexLens!{I <: Tuple} <: Lens
+    indices::I
+end
+struct IndexLens!!{I <: Tuple} <: Lens
+    indices::I
+end
 
-Base.@propagate_inbounds function get(obj, l::IndexLens)
+Base.@propagate_inbounds function get(obj, l::Union{IndexLens, IndexLens!, IndexLens!!})
     getindex(obj, l.indices...)
 end
+
 Base.@propagate_inbounds function set(obj, l::IndexLens, val)
     setindex(obj, val, l.indices...)
+end
+Base.@propagate_inbounds function set(obj, l::IndexLens!, val)
+    setindex!(obj, val, l.indices...)
+end
+Base.@propagate_inbounds function set(obj, l::IndexLens!!, val)
+    setindex!!(obj, val, l.indices...)
 end
 
 """
@@ -194,14 +217,21 @@ true
 ```
 """
 struct ConstIndexLens{I} <: Lens end
+struct ConstIndexLens!{I} <: Lens end
+struct ConstIndexLens!!{I} <: Lens end
 
-Base.@propagate_inbounds get(obj, ::ConstIndexLens{I}) where I = obj[I...]
+Base.@propagate_inbounds get(obj, ::Union{ConstIndexLens{I}, ConstIndexLens!{I}, ConstIndexLens!!{I}}) where I = obj[I...]
 
 Base.@propagate_inbounds set(obj, ::ConstIndexLens{I}, val) where I =
     setindex(obj, val, I...)
+Base.@propagate_inbounds set(obj, ::ConstIndexLens!{I}, val) where I =
+    setindex!(obj, val, I...)
+Base.@propagate_inbounds set(obj, ::ConstIndexLens!!{I}, val) where I =
+    setindex!!(obj, val, I...)
 
+# TODO: Do we want/need !/!! for ConstIndexLens? If so, should below also include !! lens?
 @generated function set(obj::Union{Tuple, NamedTuple},
-                        ::ConstIndexLens{I},
+                        ::Union{ConstIndexLens{I}, ConstIndexLens!!{I}},
                         val) where I
     if length(I) == 1
         n, = I
@@ -220,15 +250,6 @@ Base.@propagate_inbounds set(obj, ::ConstIndexLens{I}, val) where I =
         end
     end
 end
-
-struct DynamicIndexLens{F} <: Lens
-    f::F
-end
-
-Base.@propagate_inbounds get(obj, I::DynamicIndexLens) = obj[I.f(obj)...]
-
-Base.@propagate_inbounds set(obj, I::DynamicIndexLens, val) =
-    setindex(obj, val, I.f(obj)...)
 
 """
     FunctionLens(f)
