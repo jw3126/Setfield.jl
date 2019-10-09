@@ -24,29 +24,82 @@ end
     @test_throws ArgumentError get_update_op(:(<=))
 end
 
-@testset "@set!" begin
-    a = 1
-    @set a = 2
-    @test a === 1
-    @set! a = 2
-    @test a === 2
+@testset "@set" begin
 
-    t = T(1, T(2,3))
-    @set t.b.a = 20
-    @test t === T(1, T(2,3))
+    t = T(1, T(2, T(T(4,4),3)))
+    s = @set t.b.b.a.a = 5
+    @test t === T(1, T(2, T(T(4,4),3)))
+    @test s === T(1, T(2, T(T(5, 4), 3)))
+    @test_throws ArgumentError @set t.b.b.a.a.a = 3
 
-    @set! t.b.a = 20
-    @test t === T(1,T(20,3))
+    t = T(1,2)
+    @test T(1, T(1,2)) === @set t.b = T(1,2)
+    @test_throws ArgumentError @set t.c = 3
 
-    a = 1
-    @set! a += 10
-    @test a === 11
-    nt = (a=1,)
-    @set! nt.a = 5
-    @test nt === (a=5,)
+    t = T(T(2,2), 1)
+    s = @set t.a.a = 3
+    @test s === T(T(3, 2), 1)
+
+    t = T(1, T(2, T(T(4,4),3)))
+    s = @set t.b.b = 4
+    @test s === T(1, T(2, 4))
+
+    t = T(1,2)
+    s = @set t.a += 1
+    @test s === T(2,2)
+
+    t = T(1,2)
+    s = @set t.b -= 2
+    @test s === T(1,0)
+
+    t = T(10, 20)
+    s = @set t.a *= 10
+    @test s === T(100, 20)
+
+    t = T(2,1)
+    s = @set t.a /= 2
+    @test s === T(1.0,1)
+
+    t = T(1, 2)
+    s = @set t.a <<= 2
+    @test s === T(4, 2)
+
+    t = T(8, 2)
+    s = @set t.a >>= 2
+    @test s === T(2, 2)
+
+    t = T(1, 2)
+    s = @set t.a &= 0
+    @test s === T(0, 2)
+
+    t = T(1, 2)
+    s = @set t.a |= 2
+    @test s === T(3, 2)
+
+    t = T((1,2),(3,4))
+    @set t.a[1] = 10
+    s1 = @set t.a[1] = 10
+    @test s1 === T((10,2),(3,4))
+    i = 1
+    si = @set t.a[i] = 10
+    @test s1 === si
+
+    s1 = @set t.a[$1] = 10
+    @test s1 === T((10,2),(3,4))
+    i = 1
+    si = @set t.a[$i] = 10
+    @test s1 === si
+
+    t = @set T(1,2).a = 2
+    @test t === T(2,2)
+
+    t = (1, 2, 3, 4)
+    @test (@set t[length(t)] = 40) === (1, 2, 3, 40)
+    @test (@set t[length(t) ÷ 2] = 20) === (1, 20, 3, 4)
 end
 
-@testset "@set" begin
+
+@testset "@set!" begin
 
     t = T(1, T(2, T(T(4,4),3)))
     s = @set t.b.b.a.a = 5

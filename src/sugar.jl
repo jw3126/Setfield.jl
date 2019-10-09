@@ -29,7 +29,7 @@ T(T(2, 3), 2)
 ```
 """
 macro set(ex)
-    atset_impl(ex, NoBang())
+    atset_impl(ex, NeverMutate())
 end
 
 """
@@ -47,18 +47,18 @@ julia> t
 (a = 2,)
 """
 macro set!(ex)
-    atset_impl(ex, OneBang())
+    atset_impl(ex, AlwaysMutate())
 end
 
 macro set!!(ex)
-    atset_impl(ex, TwoBang())
+    atset_impl(ex, MaybeMutate())
 end
 
 is_interpolation(x) = x isa Expr && x.head == :$
 
-function parse_obj_lenses(ex, bang::BangStyle)
+function parse_obj_lenses(ex, policy::MutationPolicy)
     if @capture(ex, front_[indices__])
-        obj, frontlens = parse_obj_lenses(front, bang)
+        obj, frontlens = parse_obj_lenses(front, policy)
         if any(is_interpolation, indices)
             if !all(is_interpolation, indices)
                 throw(ArgumentError(string(
@@ -66,22 +66,16 @@ function parse_obj_lenses(ex, bang::BangStyle)
                     " with and without \$) cannot be mixed.")))
             end
             index = esc(Expr(:tuple, [x.args[1] for x in indices]...))
-            lens = :(ConstIndexLens{$index}())
+            lens = :(ConstIndexLens{$index, $policy}())
         else
             index = esc(Expr(:tuple, indices...))
-            lens = :(IndexLens($index))
+            lens = :(IndexLens{typeof($index), $policy}($index))
         end
     elseif @capture(ex, front_.property_)
-        obj, frontlens = parse_obj_lenses(front, bang)
-        if bang isa NoBang
-            lens = :(PropertyLens{$(QuoteNode(property))}())
-        elseif bang isa OneBang
-            lens = :(PropertyLens!{$(QuoteNode(property))}())
-        elseif bang isa TwoBang
-            lens = :(PropertyLens!!{$(QuoteNode(property))}())
-        end
+        obj, frontlens = parse_obj_lenses(front, policy)
+        lens = :(PropertyLens{$(QuoteNode(property)), $policy}())
     elseif @capture(ex, f_(front_))
-        obj, frontlens = parse_obj_lenses(front, bang)
+        obj, frontlens = parse_obj_lenses(front, policy)
         lens = :(FunctionLens($(esc(f))))
     else
         obj = esc(ex)
@@ -90,8 +84,8 @@ function parse_obj_lenses(ex, bang::BangStyle)
     obj, tuple(frontlens..., lens)
 end
 
-function parse_obj_lens(ex, bang::BangStyle)
-    obj, lenses = parse_obj_lenses(ex, bang)
+function parse_obj_lens(ex, policy::MutationPolicy)
+    obj, lenses = parse_obj_lenses(ex, policy)
     lens = Expr(:call, :compose, lenses...)
     obj, lens
 end
@@ -113,11 +107,11 @@ struct _UpdateOp{OP,V}
 end
 (u::_UpdateOp)(x) = u.op(x, u.val)
 
-function atset_impl(ex::Expr, bang::BangStyle)
+function atset_impl(ex::Expr, policy::MutationPolicy)
     @assert ex.head isa Symbol
     @assert length(ex.args) == 2
     ref, val = ex.args
-    obj, lens = parse_obj_lens(ref, bang)
+    obj, lens = parse_obj_lens(ref, policy)
     dst = gensym("_")
     val = esc(val)
     ret = if ex.head == :(=)
@@ -168,7 +162,7 @@ julia> set(t, (@lens _[1]), "1")
 
 """
 macro lens(ex)
-    obj, lens = parse_obj_lens(ex, NoBang())
+    obj, lens = parse_obj_lens(ex, NeverMutate())
     if obj != esc(:_)
         msg = """Cannot parse lens $ex. Lens expressions must start with @lens _"""
         throw(ArgumentError(msg))
@@ -177,7 +171,7 @@ macro lens(ex)
 end
 
 macro lens!(ex)
-    obj, lens = parse_obj_lens(ex, OneBang())
+    obj, lens = parse_obj_lens(ex, AlwaysMutate())
     if obj != esc(:_)
         msg = """Cannot parse lens $ex. Lens expressions must start with @lens _"""
         throw(ArgumentError(msg))
@@ -186,7 +180,7 @@ macro lens!(ex)
 end
 
 macro lens!!(ex)
-    obj, lens = parse_obj_lens(ex, TwoBang())
+    obj, lens = parse_obj_lens(ex, MaybeMutate())
     if obj != esc(:_)
         msg = """Cannot parse lens $ex. Lens expressions must start with @lens _"""
         throw(ArgumentError(msg))
