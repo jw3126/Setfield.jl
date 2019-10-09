@@ -3,6 +3,7 @@ using Test
 using Setfield
 using Setfield: compose, get_update_op
 using Setfield.Experimental
+import ConstructionBase
 
 struct T
     a
@@ -21,28 +22,6 @@ end
     @test get_update_op(:(%=)) === :(%)
     @test_throws ArgumentError get_update_op(:(++))
     @test_throws ArgumentError get_update_op(:(<=))
-end
-
-@testset "@set!" begin
-    a = 1
-    @set a = 2
-    @test a === 1
-    @set! a = 2
-    @test a === 2
-
-    t = T(1, T(2,3))
-    @set t.b.a = 20
-    @test t === T(1, T(2,3))
-
-    @set! t.b.a = 20
-    @test t === T(1,T(20,3))
-
-    a = 1
-    @set! a += 10
-    @test a === 11
-    nt = (a=1,)
-    @set! nt.a = 5
-    @test nt === (a=5,)
 end
 
 @testset "@set" begin
@@ -104,10 +83,81 @@ end
     i = 1
     si = @set t.a[i] = 10
     @test s1 === si
-    se = @set t.a[end] = 20
-    @test se === T((1,20),(3,4))
-    se1 = @set t.a[end-1] = 10
-    @test s1 === se1
+
+    s1 = @set t.a[$1] = 10
+    @test s1 === T((10,2),(3,4))
+    i = 1
+    si = @set t.a[$i] = 10
+    @test s1 === si
+
+    t = @set T(1,2).a = 2
+    @test t === T(2,2)
+
+    t = (1, 2, 3, 4)
+    @test (@set t[length(t)] = 40) === (1, 2, 3, 40)
+    @test (@set t[length(t) ÷ 2] = 20) === (1, 20, 3, 4)
+end
+
+
+@testset "@set!" begin
+
+    t = T(1, T(2, T(T(4,4),3)))
+    s = @set t.b.b.a.a = 5
+    @test t === T(1, T(2, T(T(4,4),3)))
+    @test s === T(1, T(2, T(T(5, 4), 3)))
+    @test_throws ArgumentError @set t.b.b.a.a.a = 3
+
+    t = T(1,2)
+    @test T(1, T(1,2)) === @set t.b = T(1,2)
+    @test_throws ArgumentError @set t.c = 3
+
+    t = T(T(2,2), 1)
+    s = @set t.a.a = 3
+    @test s === T(T(3, 2), 1)
+
+    t = T(1, T(2, T(T(4,4),3)))
+    s = @set t.b.b = 4
+    @test s === T(1, T(2, 4))
+
+    t = T(1,2)
+    s = @set t.a += 1
+    @test s === T(2,2)
+
+    t = T(1,2)
+    s = @set t.b -= 2
+    @test s === T(1,0)
+
+    t = T(10, 20)
+    s = @set t.a *= 10
+    @test s === T(100, 20)
+
+    t = T(2,1)
+    s = @set t.a /= 2
+    @test s === T(1.0,1)
+
+    t = T(1, 2)
+    s = @set t.a <<= 2
+    @test s === T(4, 2)
+
+    t = T(8, 2)
+    s = @set t.a >>= 2
+    @test s === T(2, 2)
+
+    t = T(1, 2)
+    s = @set t.a &= 0
+    @test s === T(0, 2)
+
+    t = T(1, 2)
+    s = @set t.a |= 2
+    @test s === T(3, 2)
+
+    t = T((1,2),(3,4))
+    @set t.a[1] = 10
+    s1 = @set t.a[1] = 10
+    @test s1 === T((10,2),(3,4))
+    i = 1
+    si = @set t.a[i] = 10
+    @test s1 === si
 
     s1 = @set t.a[$1] = 10
     @test s1 === T((10,2),(3,4))
@@ -195,8 +245,6 @@ end
             @lens _.b.a.b[i]
             @lens _.b.a.b[$2]
             @lens _.b.a.b[$i]
-            @lens _.b.a.b[end]
-            @lens _.b.a.b[identity(end) - 1]
             @lens _
         ]
         val1, val2 = randn(2)
@@ -232,8 +280,6 @@ end
           ((@lens _.b.a.b[$(i+1)]),  4  ),
           ((@lens _.b.a.b[$2]   ),   4.0),
           ((@lens _.b.a.b[$(i+1)]),  4.0),
-          ((@lens _.b.a.b[end]),     4.0),
-          ((@lens _.b.a.b[end÷2+1]), 4.0),
           ((@lens _             ),   obj),
           ((@lens _             ),   :xy),
           (MultiPropertyLens((a=(@lens _), b=(@lens _))), (a=1, b=2)),
@@ -246,49 +292,23 @@ end
 
 @testset "IndexLens" begin
     l = @lens _[]
-    @test l isa Setfield.IndexLens
     x = randn()
     obj = Ref(x)
     @test get(obj, l) == x
 
     l = @lens _[][]
-    @test l.outer isa Setfield.IndexLens
-    @test l.inner isa Setfield.IndexLens
     inner = Ref(x)
     obj = Base.RefValue{typeof(inner)}(inner)
     @test get(obj, l) == x
 
     obj = (1,2,3)
     l = @lens _[1]
-    @test l isa Setfield.IndexLens
     @test get(obj, l) == 1
     @test set(obj, l, 6) == (6,2,3)
 
 
     l = @lens _[1:3]
-    @test l isa Setfield.IndexLens
     @test get([4,5,6,7], l) == [4,5,6]
-end
-
-@testset "DynamicIndexLens" begin
-    l = @lens _[end]
-    @test l isa Setfield.DynamicIndexLens
-    obj = (1,2,3)
-    @test get(obj, l) == 3
-    @test set(obj, l, true) == (1,2,true)
-
-    l = @lens _[end÷2]
-    @test l isa Setfield.DynamicIndexLens
-    obj = (1,2,3)
-    @test get(obj, l) == 1
-    @test set(obj, l, true) == (true,2,3)
-
-    two = 2
-    plusone(x) = x + 1
-    l = @lens _.a[plusone(end) - two].b
-    obj = (a=(1, (a=10, b=20), 3), b=4)
-    @test get(obj, l) == 20
-    @test set(obj, l, true) == (a=(1, (a=10, b=true), 3), b=4)
 end
 
 @testset "ConstIndexLens" begin
@@ -370,7 +390,7 @@ end
     @inferred set(obj, l_nested, (a=(a=10.0, c="twenty"), b=:thirty))
 end
 
-@testset "type change during @set (default constructor_of)" begin
+@testset "type change during @set (default constructorof)" begin
     obj = TT(2,3)
     obj2 = @set obj.b = :three
     @test obj2 === TT(2, :three)
@@ -382,9 +402,9 @@ struct B{T, X, Y}
     y::Y
     B{T}(x::X, y::Y = 2) where {T, X, Y} = new{T, X, Y}(x, y)
 end
-Setfield.constructor_of(::Type{<: B{T}}) where T = B{T}
+ConstructionBase.constructorof(::Type{<: B{T}}) where T = B{T}
 
-@testset "type change during @set (custom constructor_of)" begin
+@testset "type change during @set (custom constructorof)" begin
     obj = B{1}(2,3)
     obj2 = @set obj.y = :three
     @test obj2 === B{1}(2, :three)
@@ -422,22 +442,18 @@ end
     @test_throws ArgumentError (@set t.z = 3)
 end
 
-@testset "setproperties" begin
-    o = T(1,2)
-    @test setproperties(o, (a=2, b=3)) === T(2,3)
-    @test setproperties(o, (a=2, b=3.0)) === T(2,3.0)
-    @test_throws ArgumentError setproperties(o, (a=2, c=3.0))
-end
-
 struct CustomProperties
     _a
     _b
 end
-function Setfield.setproperties(o::CustomProperties, patch)
+
+function ConstructionBase.setproperties(o::CustomProperties, patch::NamedTuple)
     CustomProperties(get(patch, :a, getfield(o, :_a)),
                      get(patch, :b, getfield(o, :_b)))
 
 end
+
+ConstructionBase.constructorof(::Type{CustomProperties}) = error()
 
 @testset "setproperties overloading" begin
     o = CustomProperties("A", "B")

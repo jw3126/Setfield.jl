@@ -1,4 +1,4 @@
-export @set, @lens, @set!
+export @set, @set!, @set!!, @lens, @lens!, @lens!!
 using MacroTools
 
 """
@@ -29,7 +29,7 @@ T(T(2, 3), 2)
 ```
 """
 macro set(ex)
-    atset_impl(ex, overwrite=false)
+    atset_impl(ex, NeverMutate())
 end
 
 """
@@ -47,38 +47,18 @@ julia> t
 (a = 2,)
 """
 macro set!(ex)
-    atset_impl(ex, overwrite=true)
+    atset_impl(ex, AlwaysMutate())
+end
+
+macro set!!(ex)
+    atset_impl(ex, MaybeMutate())
 end
 
 is_interpolation(x) = x isa Expr && x.head == :$
 
-foldtree(op, init, x) = op(init, x)
-foldtree(op, init, ex::Expr) =
-    op(foldl((acc, x) -> foldtree(op, acc, x), ex.args; init=init), ex)
-
-need_dynamic_lens(ex) =
-    foldtree(false, ex) do yes, x
-        yes || x === :end || x === :_
-    end
-
-replace_underscore(ex, to) = postwalk(x -> x === :_ ? to : x, ex)
-
-function lower_index(collection::Symbol, index, dim)
-    if isexpr(index, :call)
-        return Expr(:call, lower_index.(collection, index.args, dim)...)
-    elseif index === :end
-        if dim === nothing
-            return :($(Base.lastindex)($collection))
-        else
-            return :($(Base.lastindex)($collection, $dim))
-        end
-    end
-    return index
-end
-
-function parse_obj_lenses(ex)
+function parse_obj_lenses(ex, policy::MutationPolicy)
     if @capture(ex, front_[indices__])
-        obj, frontlens = parse_obj_lenses(front)
+        obj, frontlens = parse_obj_lenses(front, policy)
         if any(is_interpolation, indices)
             if !all(is_interpolation, indices)
                 throw(ArgumentError(string(
@@ -86,22 +66,16 @@ function parse_obj_lenses(ex)
                     " with and without \$) cannot be mixed.")))
             end
             index = esc(Expr(:tuple, [x.args[1] for x in indices]...))
-            lens = :(ConstIndexLens{$index}())
-        elseif any(need_dynamic_lens, indices)
-            @gensym collection
-            indices = replace_underscore.(indices, collection)
-            dims = length(indices) == 1 ? nothing : 1:length(indices)
-            lindices = esc.(lower_index.(collection, indices, dims))
-            lens = :(DynamicIndexLens($(esc(collection)) -> ($(lindices...),)))
+            lens = :(ConstIndexLens{$index, $policy}())
         else
             index = esc(Expr(:tuple, indices...))
-            lens = :(IndexLens($index))
+            lens = :(IndexLens{typeof($index), $policy}($index))
         end
     elseif @capture(ex, front_.property_)
-        obj, frontlens = parse_obj_lenses(front)
-        lens = :(PropertyLens{$(QuoteNode(property))}())
+        obj, frontlens = parse_obj_lenses(front, policy)
+        lens = :(PropertyLens{$(QuoteNode(property)), $policy}())
     elseif @capture(ex, f_(front_))
-        obj, frontlens = parse_obj_lenses(front)
+        obj, frontlens = parse_obj_lenses(front, policy)
         lens = :(FunctionLens($(esc(f))))
     else
         obj = esc(ex)
@@ -110,8 +84,8 @@ function parse_obj_lenses(ex)
     obj, tuple(frontlens..., lens)
 end
 
-function parse_obj_lens(ex)
-    obj, lenses = parse_obj_lenses(ex)
+function parse_obj_lens(ex, policy::MutationPolicy)
+    obj, lenses = parse_obj_lenses(ex, policy)
     lens = Expr(:call, :compose, lenses...)
     obj, lens
 end
@@ -133,12 +107,12 @@ struct _UpdateOp{OP,V}
 end
 (u::_UpdateOp)(x) = u.op(x, u.val)
 
-function atset_impl(ex::Expr; overwrite::Bool)
+function atset_impl(ex::Expr, policy::MutationPolicy)
     @assert ex.head isa Symbol
     @assert length(ex.args) == 2
     ref, val = ex.args
-    obj, lens = parse_obj_lens(ref)
-    dst = overwrite ? obj : gensym("_")
+    obj, lens = parse_obj_lens(ref, policy)
+    dst = gensym("_")
     val = esc(val)
     ret = if ex.head == :(=)
         quote
@@ -188,7 +162,25 @@ julia> set(t, (@lens _[1]), "1")
 
 """
 macro lens(ex)
-    obj, lens = parse_obj_lens(ex)
+    obj, lens = parse_obj_lens(ex, NeverMutate())
+    if obj != esc(:_)
+        msg = """Cannot parse lens $ex. Lens expressions must start with @lens _"""
+        throw(ArgumentError(msg))
+    end
+    lens
+end
+
+macro lens!(ex)
+    obj, lens = parse_obj_lens(ex, AlwaysMutate())
+    if obj != esc(:_)
+        msg = """Cannot parse lens $ex. Lens expressions must start with @lens _"""
+        throw(ArgumentError(msg))
+    end
+    lens
+end
+
+macro lens!!(ex)
+    obj, lens = parse_obj_lens(ex, MaybeMutate())
     if obj != esc(:_)
         msg = """Cannot parse lens $ex. Lens expressions must start with @lens _"""
         throw(ArgumentError(msg))
