@@ -15,10 +15,13 @@ using Setfield
 ```
 For more information, see [the documentation](https://jw3126.github.io/Setfield.jl/latest/intro/).
 
-# Projects using Setfield
+# Some creative usages of Setfield
 
 * [VegaLite.jl](https://github.com/queryverse/VegaLite.jl) overloads
   `getproperty` and lens API to manipulate JSON-based nested objects.
 
 * [Kaleido.jl](https://github.com/tkf/Kaleido.jl) is a library of
   additional lenses.
+
+* [PhaseSpaceIO.jl](https://github.com/jw3126/PhaseSpaceIO.jl) overloads
+  `getproperty` and `setproperties` to get/set values from/in packed bits.
