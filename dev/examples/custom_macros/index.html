@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Custom Macros · Setfield.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>Setfield.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../intro/">Introduction</a></li><li><a class="toctext" href="../../">Docstrings</a></li><li class="current"><a class="toctext" href>Custom Macros</a><ul class="internal"></ul></li></ul></nav><article id="docs"><header><nav><ul><li><a href>Custom Macros</a></li></ul><a class="edit-page" href="https://github.com/jw3126/Setfield.jl/blob/master/examples/custom_macros.jl"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Custom Macros</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Extending-@set-and-@lens-1" href="#Extending-@set-and-@lens-1">Extending <code>@set</code> and <code>@lens</code></a></h1><p>This code demonstrates how to extend the <code>@set</code> and <code>@lens</code> mechanism with custom lenses. As a demo, we want to implement <code>@mylens!</code> and <code>@myset!</code>, which work much like <code>@lens</code> and <code>@set</code>, but mutate objects instead of returning modified copies.</p><pre><code class="language-julia">using Setfield
+using Setfield: IndexLens, PropertyLens, ComposedLens
+
+struct Lens!{L &lt;:Lens} &lt;: Lens
+    pure::L
+end
+
+Setfield.get(o, l::Lens!) = Setfield.get(o, l.pure)
+function Setfield.set(o, l::Lens!{&lt;: ComposedLens}, val)
+    o_inner = get(o, l.pure.outer)
+    set(o_inner, Lens!(l.pure.inner), val)
+end
+function Setfield.set(o, l::Lens!{PropertyLens{prop}}, val) where {prop}
+    setproperty!(o, prop, val)
+    o
+end
+function Setfield.set(o, l::Lens!{&lt;:IndexLens}, val) where {prop}
+    o[l.pure.indices...] = val
+    o
+end</code></pre><p>Now this implements the kind of <code>lens</code> the new macros should use. Of course there are more variants like <code>Lens!(&lt;:DynamicIndexLens)</code>, for which we might want to overload <code>set</code>, but lets ignore that. Instead we want to check, that everything works so far:</p><pre><code class="language-julia">using Test
+mutable struct M
+    a
+    b
+end
+
+o = M(1,2)
+l = Lens!(@lens _.b)
+set(o, l, 20)
+@test o.b == 20
+
+l = Lens!(@lens _.foo[1])
+o = (foo=[1,2,3], bar=:bar)
+set(o, l, 100)
+@test o == (foo=[100,2,3], bar=:bar)</code></pre><pre><code class="language-none">Test Passed</code></pre><p>Now we can implement the syntax macros</p><pre><code class="language-julia">using Setfield: setmacro, lensmacro
+
+macro myset!(ex)
+    setmacro(Lens!, ex)
+end
+
+macro mylens!(ex)
+    lensmacro(Lens!, ex)
+end
+
+o = M(1,2)
+@myset! o.a = :hi
+@myset! o.b += 98
+@test o.a == :hi
+@test o.b == 100
+
+deep = [[[[1]]]]
+@myset! deep[1][1][1][1] = 2
+@test deep[1][1][1][1] === 2
+
+l = @mylens! _.foo[1]
+o = (foo=[1,2,3], bar=:bar)
+set(o, l, 100)
+@test o == (foo=[100,2,3], bar=:bar)</code></pre><pre><code class="language-none">Test Passed</code></pre><p>Everything works, we can do arbitrary nesting and also use <code>+=</code> syntax etc.</p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../"><span class="direction">Previous</span><span class="title">Docstrings</span></a></footer></article></body></html>
