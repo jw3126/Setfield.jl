@@ -318,6 +318,6 @@ function Base.show(io::IO, T::Type{<:Lens})
         print(io, "typeof")
         show(io, instance)
     else
-        invoke(Base.show, Tuple{IO,Type}, io, T)
+        invoke(Base.show, Tuple{IO,DataType}, io, T)
     end
 end
