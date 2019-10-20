@@ -166,6 +166,24 @@ Base.show(io::IO, ::MIME"text/plain", ::LensWithTextPlain) =
     end
 end
 
+@testset "show of UnionAll <: Lens" begin
+    for s in [
+        "Lens",
+        "IdentityLens",
+        "PropertyLens",
+        "ComposedLens",
+        "IndexLens",
+        "ConstIndexLens",
+        "DynamicIndexLens",
+        "FunctionLens",
+    ]
+        s = "Setfield.$s"
+        buf = IOBuffer()
+        show(buf, eval(Meta.parse(s)))
+        @test s == String(take!(buf))
+    end
+end
+
 function test_getset_laws(lens, obj, val1, val2)
 
     # set ∘ get
