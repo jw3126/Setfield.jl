@@ -158,6 +158,11 @@ Base.show(io::IO, ::MIME"text/plain", ::LensWithTextPlain) =
         show(buf, item)
         item2 = eval(Meta.parse(String(take!(buf))))
         @test item === item2
+
+        # showing of Type{<:Lens}
+        show(buf, typeof(item))
+        typeof_item2 = eval(Meta.parse(String(take!(buf))))
+        @test typeof(item) === typeof_item2
     end
 end
 
