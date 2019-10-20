@@ -303,3 +303,21 @@ function print_in_atlens(io, l)
     end
     print(io, ')')
 end
+
+_instance(T::Type{<:Union{PropertyLens,ConstIndexLens,FunctionLens}}) = T()
+function _instance(T::Type{ComposedLens{U,V}}) where {U,V}
+    instances = _instance.((U, V))
+    any(==(nothing), instances) && return nothing
+    return T(instances...)
+end
+_instance(::Any) = nothing
+
+function Base.show(io::IO, T::Type{<:Lens})
+    instance = _instance(T)
+    if instance !== nothing
+        print(io, "typeof")
+        show(io, instance)
+    else
+        invoke(Base.show, Tuple{IO,Type}, io, T)
+    end
+end
