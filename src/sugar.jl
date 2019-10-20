@@ -313,6 +313,7 @@ end
 _instance(::Any) = nothing
 
 function Base.show(io::IO, T::Type{<:Lens})
+    T isa UnionAll && return invoke(Base.show, Tuple{IO,UnionAll}, io, T)
     instance = _instance(T)
     if instance !== nothing
         print(io, "typeof")
