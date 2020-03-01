@@ -4,6 +4,7 @@ import PerformanceTestTools
 import Setfield
 using Documenter: doctest
 
+include("test_new_lens_like.jl")
 include("test_setindex.jl")
 include("test_examples.jl")
 include("test_setmacro.jl")

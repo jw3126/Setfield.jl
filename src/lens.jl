@@ -10,6 +10,14 @@ import Base: get
 using Base: getproperty
 
 """
+
+    AbstractLensLike
+
+Abstract supertype for lens like objects. Examples include lenses, prisms and semantic editor combinators.
+"""
+abstract type AbstractLensLike end
+
+"""
     Lens
 
 A `Lens` allows to access or replace deeply nested parts of complicated objects.
@@ -60,7 +68,7 @@ These must be pure functions, that satisfy the three lens laws:
 
 See also [`@lens`](@ref), [`set`](@ref), [`get`](@ref), [`modify`](@ref).
 """
-abstract type Lens end
+abstract type Lens <: AbstractLensLike end
 
 """
     modify(f, obj, l::Lens)
@@ -113,12 +121,12 @@ struct ComposedLens{LO, LI} <: Lens
 end
 
 compose() = IdentityLens()
-compose(l::Lens) = l
+compose(l::AbstractLensLike) = l
 compose(::IdentityLens, ::IdentityLens) = IdentityLens()
-compose(::IdentityLens, l::Lens) = l
-compose(l::Lens, ::IdentityLens) = l
-compose(outer::Lens, inner::Lens) = ComposedLens(outer, inner)
-function compose(l1::Lens, ls::Lens...)
+compose(::IdentityLens, l::AbstractLensLike) = l
+compose(l::AbstractLensLike, ::IdentityLens) = l
+compose(outer::AbstractLensLike, inner::AbstractLensLike) = ComposedLens(outer, inner)
+function compose(l1::AbstractLensLike, ls::AbstractLensLike...)
     # We can build _.a.b.c as (_.a.b).c or _.a.(b.c)
     # The compiler prefers (_.a.b).c
     compose(l1, compose(ls...))
@@ -146,7 +154,7 @@ julia> get(obj, lens)
 1
 ```
 """
-Base.:∘(l1::Lens, l2::Lens) = compose(l1, l2)
+Base.:∘(l1::AbstractLensLike, l2::AbstractLensLike) = compose(l1, l2)
 
 function get(obj, l::ComposedLens)
     inner_obj = get(obj, l.outer)
