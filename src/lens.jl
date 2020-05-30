@@ -111,24 +111,24 @@ struct ComposedLens{LO, LI} <: Lens
 end
 
 """
-    compose([lens₁, [lens₂, [lens₃, ...]]])
+    lenscompose([lens₁, [lens₂, [lens₃, ...]]])
 
 Compose `lens₁`, `lens₂` etc. There is one subtle point here:
 While the two composition orders `(lens₁ ∘ lens₂) ∘ lens₃` and `lens₁ ∘ (lens₂ ∘ lens₃)` have equivalent semantics,
 their performance may not be the same. The compiler tends to optimize right associative composition
 (second case) better then left associative composition.
 
-The compose function tries to use a composition order, that the compiler likes. The composition order is therefore not part of the stable API.
+The lenscompose function tries to use a composition order, that the compiler likes. The composition order is therefore not part of the stable API.
 """
-function compose end
-compose() = IdentityLens()
-compose(l::Lens) = l
-compose(::IdentityLens, ::IdentityLens) = IdentityLens()
-compose(::IdentityLens, l::Lens) = l
-compose(l::Lens, ::IdentityLens) = l
-compose(outer::Lens, inner::Lens) = ComposedLens(outer, inner)
-function compose(l1::Lens, ls::Lens...)
-    compose(l1, compose(ls...))
+function lenscompose end
+lenscompose() = IdentityLens()
+lenscompose(l::Lens) = l
+lenscompose(::IdentityLens, ::IdentityLens) = IdentityLens()
+lenscompose(::IdentityLens, l::Lens) = l
+lenscompose(l::Lens, ::IdentityLens) = l
+lenscompose(outer::Lens, inner::Lens) = ComposedLens(outer, inner)
+function lenscompose(l1::Lens, ls::Lens...)
+    lenscompose(l1, lenscompose(ls...))
 end
 
 """
@@ -152,7 +152,7 @@ julia> get(obj, lens)
 1
 ```
 """
-Base.:∘(l1::Lens, l2::Lens) = compose(l1, l2)
+Base.:∘(l1::Lens, l2::Lens) = lenscompose(l1, l2)
 
 function get(obj, l::ComposedLens)
     inner_obj = get(obj, l.outer)

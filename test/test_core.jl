@@ -1,7 +1,7 @@
 module TestCore
 using Test
 using Setfield
-using Setfield: compose, get_update_op
+using Setfield: lenscompose, get_update_op
 using ConstructionBase: ConstructionBase
 using StaticNumbers: static
 
@@ -327,13 +327,13 @@ end
 
 @testset "IdentityLens" begin
     id = @lens _
-    @test compose(id, id) === id
+    @test lenscompose(id, id) === id
     obj1 = M(1,1)
     obj2 = M(2,2)
     @test obj2 === set(obj1, id, obj2)
     la = @lens _.a
-    @test compose(id, la) === la
-    @test compose(la, id) === la
+    @test lenscompose(id, la) === la
+    @test lenscompose(la, id) === la
 end
 
 struct ABC{A,B,C}
@@ -423,11 +423,11 @@ end
     @test @lens(∘()) === @lens(_)
     @test @lens(∘(_.a)) === @lens(_.a)
     @test @lens(∘(_.a, _.b)) === @lens(_.a) ∘ @lens(_.b)
-    @test @lens(∘(_.a, _.b, _.c)) === Setfield.compose(@lens(_.a), @lens(_.b), @lens(_.c))
+    @test @lens(∘(_.a, _.b, _.c)) === Setfield.lenscompose(@lens(_.a), @lens(_.b), @lens(_.c))
 
     @test @lens(∘(_[1])) === @lens(_[1])
     @test @lens(∘(_[1], _[2])) === @lens(_[1]) ∘ @lens(_[2])
-    @test @lens(∘(_[1], _[2], _[3])) === Setfield.compose(@lens(_[1]), @lens(_[2]), @lens(_[3]))
+    @test @lens(∘(_[1], _[2], _[3])) === Setfield.lenscompose(@lens(_[1]), @lens(_[2]), @lens(_[3]))
 
     @test @lens(_ ∘ (_[1] ∘ _.a) ∘ first(_)) == @lens(_) ∘ (@lens(_[1]) ∘ @lens(_.a)) ∘ @lens(first(_))
 end

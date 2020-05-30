@@ -132,7 +132,7 @@ end
 
 function parse_obj_lens(ex)
     obj, lenses = parse_obj_lenses(ex)
-    lens = Expr(:call, compose, lenses...)
+    lens = Expr(:call, lenscompose, lenses...)
     obj, lens
 end
 
