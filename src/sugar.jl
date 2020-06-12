@@ -28,8 +28,8 @@ julia> @set t.a.b = 3
 T(T(2, 3), 2)
 ```
 """
-macro set(ex)
-    setmacro(identity, ex, overwrite=false)
+macro set(ex...)
+    setmacro(identity, ex..., overwrite=false)
 end
 
 """
@@ -51,8 +51,8 @@ julia> t
 (a = 2,)
 ```
 """
-macro set!(ex)
-    setmacro(identity, ex, overwrite=true)
+macro set!(ex...)
+    setmacro(identity, ex..., overwrite=true)
 end
 
 is_interpolation(x) = x isa Expr && x.head == :$
@@ -154,7 +154,7 @@ end
 (u::_UpdateOp)(x) = u.op(x, u.val)
 
 """
-    setmacro(lenstransform, ex::Expr; overwrite::Bool=false)
+    setmacro(lenstransform, ex::Expr...; overwrite::Bool=false)
 
 This function can be used to create a customized variant of [`@set`](@ref).
 It works by applying `lenstransform` to the lens that is used in the customized `@set` macro
@@ -169,28 +169,50 @@ end
 ```
 See also [`lensmacro`](@ref).
 """
-function setmacro(lenstransform, ex::Expr; overwrite::Bool=false)
-    @assert ex.head isa Symbol
-    @assert length(ex.args) == 2
-    ref, val = ex.args
-    obj, lens = parse_obj_lens(ref)
+function setmacro(lenstransform, exprs::Expr...; overwrite::Bool=false)
+    @assert all(set_asserts.(exprs))
+    (obj, lenses) = get_obj_lens(exprs)
     dst = overwrite ? obj : gensym("_")
-    val = esc(val)
-    ret = if ex.head == :(=)
-        quote
-            lens = ($lenstransform)($lens)
-            $dst = $set($obj, lens, $val)
+
+    ret = Expr(:block)
+    ret.args = [quote end for i = 1:length(exprs)]
+    for (idx, ex) in enumerate(exprs)
+        val = (ex.args)[2]
+        lens = lenses[idx]
+        val = esc(val)
+        if idx >1
+            obj = dst
         end
-    else
-        op = get_update_op(ex.head)
-        f = :($_UpdateOp($op,$val))
-        quote
-            lens = ($lenstransform)($lens)
-            $dst = $modify($f, $obj, lens)
+        ret.args[idx] = if ex.head == :(=)
+            quote
+                lens = ($lenstransform)($lens)
+                $dst = $set($obj, lens, $val)
+            end
+        else
+            op = get_update_op(ex.head)
+            f = :($_UpdateOp($op,$val))
+            quote
+                lens = ($lenstransform)($lens)
+                $dst = $modify($f, $obj, lens)
+            end
         end
     end
     ret
 end
+
+function set_asserts(ex)
+    ex.head isa Symbol && length(ex.args) == 2
+end
+
+function get_obj_lens(exprs)
+    f_obj_len(ex) = parse_obj_lens(ex.args[1])
+    obj_lens = f_obj_len.(exprs)
+    objs = getindex.(obj_lens, 1)
+    lenses = getindex.(obj_lens, 2)
+    @assert all(x -> x == objs[1], objs)
+    return (objs[1], lenses)
+end
+
 
 """
     @lens
