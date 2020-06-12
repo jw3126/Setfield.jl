@@ -37,8 +37,8 @@ end
 
     @set! t.b.a = 20
     @test t === T(1,T(20,3))
-    @set! t.a = 10 t.b.a = 30
-    @test t === T(10,T(30,3))
+    @set! t.a = 10 t.b.a = 30 t.b.b = 0
+    @test t === T(10,T(30,0))
 
     a = 1
     @set! a += 10
@@ -52,10 +52,10 @@ end
 
     t = T(1, T(2, T(T(4,4),3)))
     s = @set t.b.b.a.a = 5
-    s2 = @set t.a = 10 t.b.a = 3
+    s2 = @set t.a = 10 t.b.a = 20 t.b.b.a.b = 9
     @test t === T(1, T(2, T(T(4,4),3)))
     @test s === T(1, T(2, T(T(5, 4), 3)))
-    @test s2 === T(10, T(3, T(T(4,4),3)))
+    @test s2 === T(10, T(20, T(T(4, 9),3)))
     @test_throws ArgumentError @set t.b.b.a.a.a = 3
 
     t = T(1,2)

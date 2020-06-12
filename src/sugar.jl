@@ -180,7 +180,7 @@ function setmacro(lenstransform, exprs::Expr...; overwrite::Bool=false)
         val = (ex.args)[2]
         lens = lenses[idx]
         val = esc(val)
-        if idx >1
+        if idx == 2 && !overwrite
             obj = dst
         end
         ret.args[idx] = if ex.head == :(=)
