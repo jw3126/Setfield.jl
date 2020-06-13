@@ -43,8 +43,15 @@ SpaceShip(Person(:JULIA, 2009), [999999.0, 0.0, 0.0], [0.0, 0.0, 0.0])
 julia> s = @set s.velocity[1] += 1000001
 SpaceShip(Person(:JULIA, 2009), [2.0e6, 0.0, 0.0], [0.0, 0.0, 0.0])
 
-julia> @set s.position[2] = 20
+julia> s = @set s.position[2] = 20
 SpaceShip(Person(:JULIA, 2009), [2.0e6, 0.0, 0.0], [0.0, 20.0, 0.0])
+```
+
+Setting multiple fields also works
+
+```jldoctest spaceship
+julia> @set s.captain.name = :Julia s.captain.age = 1 s.position[1] = 3
+SpaceShip(Person(:Julia, 1), [2.0e6, 0.0, 0.0], [3.0, 20.0, 0.0])
 ```
 
 ## Under the hood
