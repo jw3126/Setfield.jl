@@ -5,7 +5,12 @@
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://jw3126.github.io/Setfield.jl/stable/intro)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://jw3126.github.io/Setfield.jl/dev/intro)
 
-Update deeply nested immutable structs.
+Update deeply nested immutable structs. 
+
+# Lifecycle
+
+We plan to maintain `Setfield.jl` for a long time (written 2020-09-21). We will however not add new features. For an experimental stage
+successor, see [Accessors.jl](https://github.com/JuliaObjects/Accessors.jl).
 
 # Usage
 Updating deeply nested immutable structs was never easier:
