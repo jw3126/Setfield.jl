@@ -30,7 +30,7 @@ One convenience with mutability is, that it makes updating objects very simple:
 The analogous operation in the immutable case is to create a copy of `spaceship`,
 with just the captains name changed to "Julia". This operation is sometimtes called functional update.
 Just think for a moment, how would you do achieve this?
-It is a non trivial problem and there are many approaches. Both in Julia [@JuliaPR21912; @MutabilitiesPackage] and other languages [@HaskellLens; @ImmutableJS].
+It is a non trivial problem and there are many approaches. Both in Julia [@MutabilitiesPackage] and other languages [@HaskellLens; @ClojureSpecter; @ImmutableJS].
 
 The `Setfield.jl` package provides one solution to this problem. Namely it allows the user
 to specify a functional update using the same syntax as in a mutable setting. The only syntactic difference is the `@set` macro in front:
@@ -38,7 +38,7 @@ to specify a functional update using the same syntax as in a mutable setting. Th
 `@set spaceship.captain.name = "Julia"`
 
 And voila, this returns an updated copy. The implementation is based on the lens formalism,
-see the documentation of the package. For an entry point to the lens literature see the introduction of [@AlgebrasAndUpdateStrategies].
+see the documentation of the package. For an entry point to the lens literature see the introduction of [@AlgebrasAndUpdateStrategies] or references in [@riley2018categories].
 
 # Acknowledgements
 
