@@ -42,7 +42,6 @@ see the documentation of the package. For an entry point to the lens literature 
 
 # Acknowledgements
 
-We acknowledge various small contributions in form of issues and pull requests, by various
-authors. Details can be extracted from the github repository of the package.
+We acknowledge various larger and smaller contributions in form of issues and pull requests, by various authors. Especially Takafumi Arakaki made many great contributions. Details can be extracted from the github repository of the package.
 
 # References
