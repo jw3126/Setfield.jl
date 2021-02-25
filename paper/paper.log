@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2020.11.28)  16 FEB 2021 09:52
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2020.11.28)  25 FEB 2021 18:08
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -421,6 +421,26 @@ LaTeX Font Info:    Font shape `U/lasy/b/n' in size <6> not available
 (./paper.bbl
 Underfull \vbox (badness 5446) has occurred while \output is active []
 
+
+Underfull \hbox (badness 10000) in paragraph at lines 9--12
+[]\T1/ptm/m/n/9 Edward Kmett and con-tributers. Lens, 2012.
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 29--32
+[]\T1/ptm/m/n/9 Lee Bryon and con-tributers. Immutable-js, 2014.
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 34--37
+[]\T1/ptm/m/n/9 Nathan Marz and con-tributers. Specter, 2015.
+ []
+
+
+Underfull \hbox (badness 7291) in paragraph at lines 44--47
+[]\T1/ptm/m/n/9 Takafumi Arakaki and Jan Wei-d-ner. Set-field.jl, 2017.
+ []
+
 ))
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 50.
 
@@ -456,7 +476,7 @@ ve2020/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.525pk></usr/share/texlive
 ve/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/f
 onts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/
 times/utmri8a.pfb>
-Output written on paper.pdf (1 page, 56617 bytes).
+Output written on paper.pdf (1 page, 56742 bytes).
 PDF statistics:
  94 PDF objects out of 1000 (max. 8388607)
  68 compressed objects within 1 object stream

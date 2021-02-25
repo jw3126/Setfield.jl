@@ -8,10 +8,12 @@ Julia: A fresh approach to numerical computing.
 \bibitem{HaskellLens}
 {Edward Kmett} and contributers.
 {Lens}, 2012.
+https://github.com/ekmett/lens.
 
 \bibitem{JuliaPR21912}
 Keno Fischer.
 {Heap allocated immutable arrays and compiler support}, 2019.
+https://github.com/JuliaLang/julia/pull/21912.
 
 \bibitem{AlgebrasAndUpdateStrategies}
 Michael Johnson, Robert Rosebrugh, and Richard Wood.
@@ -26,17 +28,21 @@ The following article appeared in Journal of universal computer science, 16(5),
 \bibitem{ImmutableJS}
 {Lee Bryon} and contributers.
 {Immutable-js}, 2014.
+https://github.com/immutable-js/immutable-js.
 
 \bibitem{ClojureSpecter}
 {Nathan Marz} and contributers.
 {Specter}, 2015.
+https://github.com/redplanetlabs/specter.
 
 \bibitem{riley2018categories}
 Mitchell Riley.
-Categories of optics, 2018.
+Categories of optics.
+2018.
 
 \bibitem{SetfieldPackage}
 {Takafumi Arakaki} and {Jan Weidner}.
 {Setfield.jl}, 2017.
+https://github.com/jw3126/Setfield.jl.
 
 \end{thebibliography}
