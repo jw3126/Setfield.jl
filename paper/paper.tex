@@ -1,0 +1,52 @@
+% JuliaCon proceedings template
+\documentclass{juliacon}
+\setcounter{page}{1}
+
+\begin{document}
+
+\input{header}
+
+\maketitle
+
+\begin{abstract}
+
+    We discuss the problem of updating immutable objects. The solutions presented are implemented in the Setfield.jl package \cite{SetfieldPackage}.
+
+\end{abstract}
+
+\section{Overview}
+
+In the Julia programming language \cite{Julia-2017}, some objects are \textbf{mutable} (Array, mutable struct, ...), while others are \textbf{immutable} (Tuple, struct, ...).
+Neither is strictly better than the other in every situation. However, immutability usually leads to code that is easier to reason about, for both humans and compilers.
+Which means less buggy and more performant programs.
+One convenience with mutability is, that it makes updating objects very simple:
+
+\begin{lstlisting}[language = Julia]
+spaceship.captain.name = "Julia"
+\end{lstlisting}
+
+The analogous operation in the immutable case is to create a copy of \textit{spaceship},
+with just the captains name changed to "Julia". This operation is sometimes called functional update.
+Just think for a moment, how would you do achieve this?
+It is a non trivial problem and there are many approaches, both in Julia \cite{JuliaPR21912} and other languages \cite{HaskellLens}; \cite{ClojureSpecter}; \cite{ImmutableJS}.
+
+The Setfield.jl package \cite{SetfieldPackage} provides one solution to this problem. Namely it allows the user
+to specify a functional update using the same syntax as in a mutable setting. The only syntactic difference is the @set macro in front:
+
+\begin{lstlisting}[language = Julia]
+@set spaceship.captain.name = "Julia"
+\end{lstlisting}
+
+And voila, this returns an updated copy. The implementation is based on the lens formalism,
+see the documentation of the package. For an entry point to the lens literature see the introduction of \cite{AlgebrasAndUpdateStrategies} or references in \cite{riley2018categories}.
+
+\section{Acknowledgements}
+
+I would like to acknowledge various larger and smaller contributions in form of issues and pull requests, by various authors. Especially Takafumi Arakaki made many great contributions. Details can be extracted from the github repository of the package.
+
+
+\input{bib.tex}
+
+\end{document}
+
+% Inspired by the International Journal of Computer Applications template
