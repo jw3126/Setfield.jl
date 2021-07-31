@@ -281,6 +281,12 @@ end
     obj = (a=(1, (a=10, b=20), 3), b=4)
     @test get(obj, l) == 20
     @test set(obj, l, true) == (a=(1, (a=10, b=true), 3), b=4)
+
+    if Setfield.HAS_BEGIN_INDEXING
+        # Need to keep this in a separate file since `begin` won't parse
+        # on older Julia versions.
+        include("dynamiclens_begin.jl")
+    end
 end
 
 @testset "StaticNumbers" begin
