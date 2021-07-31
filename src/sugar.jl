@@ -61,50 +61,31 @@ foldtree(op, init, x) = op(init, x)
 foldtree(op, init, ex::Expr) =
     op(foldl((acc, x) -> foldtree(op, acc, x), ex.args; init=init), ex)
 
-@static if VERSION ≥ v"1.5.0-DEV.666"
-    function need_dynamic_lens(ex)
-        return foldtree(false, ex) do yes, x
-            (yes || x === :end || x === :begin || x === :_)
-        end
-    end
+const HAS_BEGIN_INDEXING = VERSION ≥ v"1.5.0-DEV.666"
 
-    function lower_index(collection::Symbol, index, dim)
-        if isexpr(index, :call)
-            return Expr(:call, lower_index.(collection, index.args, dim)...)
-        elseif (index === :end)
-            if dim === nothing
-                return :($(Base.lastindex)($collection))
-            else
-                return :($(Base.lastindex)($collection, $dim))
-            end
-        elseif (index === :begin)
-            if dim === nothing
-                return :($(Base.firstindex)($collection))
-            else
-                return :($(Base.firstindex)($collection, $dim))
-            end
-        end
-        return index
+function need_dynamic_lens(ex)
+    return foldtree(false, ex) do yes, x
+        (yes || x === :end || (HAS_BEGIN_INDEXING && x === :begin) || x === :_)
     end
-else
-    function need_dynamic_lens(ex)
-        return foldtree(false, ex) do yes, x
-            (yes || x === :end || x === :_)
-        end
-    end
+end
 
-    function lower_index(collection::Symbol, index, dim)
-        if isexpr(index, :call)
-            return Expr(:call, lower_index.(collection, index.args, dim)...)
-        elseif (index === :end)
-            if dim === nothing
-                return :($(Base.lastindex)($collection))
-            else
-                return :($(Base.lastindex)($collection, $dim))
-            end
+function lower_index(collection::Symbol, index, dim)
+    if isexpr(index, :call)
+        return Expr(:call, lower_index.(collection, index.args, dim)...)
+    elseif (index === :end)
+        if dim === nothing
+            return :($(Base.lastindex)($collection))
+        else
+            return :($(Base.lastindex)($collection, $dim))
         end
-        return index
+    elseif HAS_BEGIN_INDEXING && (index === :begin)
+        if dim === nothing
+            return :($(Base.firstindex)($collection))
+        else
+            return :($(Base.firstindex)($collection, $dim))
+        end
     end
+    return index
 end
 
 replace_underscore(ex, to) = postwalk(x -> x === :_ ? to : x, ex)
