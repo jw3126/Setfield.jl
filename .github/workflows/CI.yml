@@ -10,21 +10,28 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - 1.0
-          - 1
+          - '1.0'
+          - '1.3'
+          - '1'
           - 'nightly'
         os:
           - ubuntu-latest
-          # - macOS-latest
-          - windows-latest
         arch:
           - x64
+        include:
+          - os: macOS-latest
+            version: '1'
+            arch: x64
+          - os: windows-latest
+            version: '1'
+            arch: x64
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
+          show-versioninfo: true
       - uses: actions/cache@v1
         env:
           cache-name: cache-artifacts
