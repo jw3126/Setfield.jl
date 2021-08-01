@@ -183,19 +183,20 @@ function setmacro(lenstransform, ex::Expr; overwrite::Bool=false)
     @assert length(ex.args) == 2
     ref, val = ex.args
     obj, lens = parse_obj_lens(ref)
+    lenssym = gensym(:lens)
     dst = overwrite ? obj : gensym("_")
     val = esc(val)
     ret = if ex.head == :(=)
         quote
-            lens = ($lenstransform)($lens)
-            $dst = $set($obj, lens, $val)
+            $lenssym = ($lenstransform)($lens)
+            $dst = $set($obj, $lenssym, $val)
         end
     else
         op = get_update_op(ex.head)
         f = :($_UpdateOp($op,$val))
         quote
-            lens = ($lenstransform)($lens)
-            $dst = $modify($f, $obj, lens)
+            $lenssym = ($lenstransform)($lens)
+            $dst = $modify($f, $obj, $lenssym)
         end
     end
     ret

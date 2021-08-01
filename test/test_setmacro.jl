@@ -46,5 +46,31 @@ using StaticNumbers
     @test m3 === @SMatrix[1 0; 0 0]
 end
 
+function test_all_inferrable(f, argtypes)
+    typed = first(code_typed(f, argtypes))
+    code = typed.first
+    @test all(T -> !(T isa UnionAll || T === Any), code.slottypes)
+end
+
+# Example of macro that caused inference issues before.
+macro test_macro(expr)
+    quote
+        function f($(esc(:x)))
+            $(Setfield.setmacro(identity, expr, overwrite=true))
+            $(Setfield.setmacro(identity, expr, overwrite=true))
+            $(Setfield.setmacro(identity, expr, overwrite=true))
+            $(Setfield.setmacro(identity, expr, overwrite=true))
+            $(Setfield.setmacro(identity, expr, overwrite=true))
+            return $(esc(:x))
+        end
+    end
+end
+
+@testset "setmacro multiple usage" begin
+    let f = @test_macro(x[end] = 1)
+        test_all_inferrable(f, (Vector{Float64}, ))
+    end
+end
+
 end#module
 
