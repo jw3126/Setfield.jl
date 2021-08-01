@@ -1,7 +1,7 @@
 # Setfield
 
-[![DocStable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaobjects.github.io/Setfield.jl/stable/intro)
-[![DocDev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaobjects.github.io/Setfield.jl/dev/intro)
+[![DocStable](https://img.shields.io/badge/docs-stable-blue.svg)](https://jw3126.github.io/Setfield.jl/stable/intro)
+[![DocDev](https://img.shields.io/badge/docs-dev-blue.svg)](https://jw3126.github.io/Setfield.jl/dev/intro)
 ![CI](https://github.com/jw3126/Setfield.jl/workflows/CI/badge.svg)
 [![codecov.io](https://codecov.io/github/jw3126/Setfield.jl/coverage.svg?branch=master)](http://codecov.io/github/jw3126/Setfield.jl?branch=master)
 
