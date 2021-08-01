@@ -66,9 +66,11 @@ macro test_macro(expr)
     end
 end
 
-@testset "setmacro multiple usage" begin
-    let f = @test_macro(x[end] = 1)
-        test_all_inferrable(f, (Vector{Float64}, ))
+if VERSION >= v"1.3"
+    @testset "setmacro multiple usage" begin
+        let f = @test_macro(x[end] = 1)
+            test_all_inferrable(f, (Vector{Float64}, ))
+        end
     end
 end
 
