@@ -119,7 +119,7 @@ end
 function ==(l1::ComposedLens{LO, LI}, l2::ComposedLens{LO, LI}) where {LO, LI}
     return l1.outer == l2.outer && l1.inner == l2.inner
 end
-hash(l::ComposedLens, h::UInt) = hash(l.outer, hash(l.inner, hash(:ComposedLens, h)))
+hash(l::ComposedLens, h::UInt) = hash(l.outer, hash(l.inner, h))
 
 """
     compose([lens₁, [lens₂, [lens₃, ...]]])
@@ -180,7 +180,7 @@ struct IndexLens{I <: Tuple} <: Lens
     indices::I
 end
 ==(l1::IndexLens{I}, l2::IndexLens{I}) where {I} = l1.indices == l2.indices
-hash(l::IndexLens, h::UInt) = hash(l.indices, hash(:IndexLens, h))
+hash(l::IndexLens, h::UInt) = hash(l.indices, h)
 
 Base.@propagate_inbounds function get(obj, l::IndexLens)
     getindex(obj, l.indices...)
