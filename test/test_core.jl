@@ -205,6 +205,26 @@ end
     end
 end
 
+@testset "equality & hashing" begin
+    # singletons (identity and property lens) are object equal
+    for (l, r) ∈ [
+        @lens(_) => @lens(_),
+        @lens(_.a) => @lens(_.a)
+    ]
+        @test l === r
+    end
+
+    # composite and index lenses are structurally equal
+    for (l, r) ∈ [
+        @lens(_[1]) => @lens(_[1])
+        @lens(_.a[2]) => @lens(_.a[2])
+    ]
+        @test l == r
+        @test hash(l) == hash(r)
+    end
+end
+
+
 @testset "type stability" begin
     o1 = 2
     o22 = 2
