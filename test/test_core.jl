@@ -206,22 +206,50 @@ end
 end
 
 @testset "equality & hashing" begin
-    # singletons (identity and property lens) are object equal
-    for (l, r) ∈ [
+    # singletons (identity and property lens) are egal
+    for (l1, l2) ∈ [
         @lens(_) => @lens(_),
         @lens(_.a) => @lens(_.a)
     ]
-        @test l === r
+        @test l1 === l2
+        @test l1 == l2
+        @test hash(l1) == hash(l2)
     end
 
     # composite and index lenses are structurally equal
-    for (l, r) ∈ [
+    for (l1, l2) ∈ [
         @lens(_[1]) => @lens(_[1])
         @lens(_.a[2]) => @lens(_.a[2])
+        @lens(_.a.b[3]) => @lens(_.a.b[3])
     ]
-        @test l == r
-        @test hash(l) == hash(r)
+        @test l1 == l2
+        @test hash(l1) == hash(l2)
     end
+
+    # inequality
+    for (l1, l2) ∈ [
+        @lens(_[1]) => @lens(_[2])
+        @lens(_.a[1]) => @lens(_.a[2])
+        @lens(_.a[1]) => @lens(_.b[1])
+    ]
+        @test l1 != l2
+    end
+
+    # Hash property: equality implies equal hashes, or in other terms:
+    # lenses either have equal hashes or are unequal
+    # Because collisions can occur theoretically (though unlikely), this is a property test,
+    # not a unit test.
+    random_lenses = (@lens(_.a[rand(Int)]) for _ in 1:1000)
+    @test all((hash(l2) == hash(l1)) || (l1 != l2)
+              for (l1, l2) in zip(random_lenses, random_lenses))
+
+    # Lenses should hash differently from the underlying tuples, to avoid confusion.
+    # To account for potential collisions, we check that the property holds with high
+    # probability.  
+    @test count(hash(@lens(_[i])) != hash((i,)) for i = 1:1000) > 900
+
+    # Same for tuples of tuples (√(1000) ≈ 32).
+    @test count(hash(@lens(_[i][j])) != hash(((i,), (j,))) for i = 1:32, j = 1:32) > 900
 end
 
 
