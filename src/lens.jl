@@ -6,8 +6,19 @@ export setproperties
 export constructorof
 
 
-import Base: get
+import Base: get, hash, ==
 using Base: getproperty
+
+
+# used for hashing
+function make_salt(s64::UInt64)::UInt
+    if UInt === UInt64
+        return s64
+    else
+        return UInt32(s64 >> 32) ^ UInt32(s64 & 0x00000000ffffffff)
+    end
+end
+
 
 """
     Lens
@@ -99,6 +110,7 @@ struct IdentityLens <: Lens end
 get(obj, ::IdentityLens) = obj
 set(obj, ::IdentityLens, val) = val
 
+
 struct PropertyLens{fieldname} <: Lens end
 
 function get(obj, l::PropertyLens{field}) where {field}
@@ -114,6 +126,13 @@ struct ComposedLens{LO, LI} <: Lens
     outer::LO
     inner::LI
 end
+
+function ==(l1::ComposedLens{LO, LI}, l2::ComposedLens{LO, LI}) where {LO, LI}
+    return l1.outer == l2.outer && l1.inner == l2.inner
+end
+
+const SALT_COMPOSEDLENS = make_salt(0xcf7322dcc2129a31)
+hash(l::ComposedLens, h::UInt) = hash(l.outer, hash(l.inner, SALT_INDEXLENS + h))
 
 """
     compose([lens₁, [lens₂, [lens₃, ...]]])
@@ -173,6 +192,11 @@ end
 struct IndexLens{I <: Tuple} <: Lens
     indices::I
 end
+
+==(l1::IndexLens{I}, l2::IndexLens{I}) where {I} = l1.indices == l2.indices
+
+const SALT_INDEXLENS = make_salt(0x8b4fd6f97c6aeed6)
+hash(l::IndexLens, h::UInt) = hash(l.indices, SALT_INDEXLENS + h)
 
 Base.@propagate_inbounds function get(obj, l::IndexLens)
     getindex(obj, l.indices...)
