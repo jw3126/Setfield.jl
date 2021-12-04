@@ -209,7 +209,7 @@ end
     # singletons (identity and property lens) are egal
     for (l1, l2) ∈ [
         @lens(_) => @lens(_),
-        @lens(_.a) => @lens(_.a)
+        @lens(_.a) => @lens(_.a),
     ]
         @test l1 === l2
         @test l1 == l2
@@ -218,9 +218,12 @@ end
 
     # composite and index lenses are structurally equal
     for (l1, l2) ∈ [
-        @lens(_[1]) => @lens(_[1])
-        @lens(_.a[2]) => @lens(_.a[2])
-        @lens(_.a.b[3]) => @lens(_.a.b[3])
+        @lens(_[1]) => @lens(_[1]),
+        @lens(_.a[2]) => @lens(_.a[2]),
+        @lens(_.a.b[3]) => @lens(_.a.b[3]),
+        @lens(_[1:10]) => @lens(_[1:10]),
+        @lens(_.a[2:20]) => @lens(_.a[2:20]),
+        @lens(_.a.b[3:30]) => @lens(_.a.b[3:30]),
     ]
         @test l1 == l2
         @test hash(l1) == hash(l2)
@@ -228,11 +231,26 @@ end
 
     # inequality
     for (l1, l2) ∈ [
-        @lens(_[1]) => @lens(_[2])
-        @lens(_.a[1]) => @lens(_.a[2])
-        @lens(_.a[1]) => @lens(_.b[1])
+        @lens(_[1]) => @lens(_[2]),
+        @lens(_.a[1]) => @lens(_.a[2]),
+        @lens(_.a[1]) => @lens(_.b[1]),
+        @lens(_[1:10]) => @lens(_[2:20]),
+        @lens(_.a[1:10]) => @lens(_.a[2:20]),
+        @lens(_.a[1:10]) => @lens(_.b[1:10]),
     ]
         @test l1 != l2
+    end
+
+    # equality with non-equal range types (#165)
+    for (l1, l2) ∈ [
+        @lens(_[1:10]) => @lens(_[Base.OneTo(10)]),
+        @lens(_.a[1:10]) => @lens(_.a[Base.OneTo(10)]),
+        @lens(_.a.b[1:10]) => @lens(_.a.b[Base.OneTo(10)]),
+        @lens(_.a[Base.StepRange(1, 1, 5)].b[1:10]) => @lens(_.a[1:5].b[Base.OneTo(10)]),
+        @lens(_.a.b[1:3]) => @lens(_.a.b[[1, 2, 3]]),
+    ]
+        @test l1 == l2
+        @test hash(l1) == hash(l2)
     end
 
     # Hash property: equality implies equal hashes, or in other terms:

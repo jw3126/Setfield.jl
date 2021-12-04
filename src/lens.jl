@@ -127,7 +127,7 @@ struct ComposedLens{LO, LI} <: Lens
     inner::LI
 end
 
-function ==(l1::ComposedLens{LO, LI}, l2::ComposedLens{LO, LI}) where {LO, LI}
+function ==(l1::ComposedLens, l2::ComposedLens)
     return l1.outer == l2.outer && l1.inner == l2.inner
 end
 
@@ -193,7 +193,7 @@ struct IndexLens{I <: Tuple} <: Lens
     indices::I
 end
 
-==(l1::IndexLens{I}, l2::IndexLens{I}) where {I} = l1.indices == l2.indices
+==(l1::IndexLens, l2::IndexLens) = l1.indices == l2.indices
 
 const SALT_INDEXLENS = make_salt(0x8b4fd6f97c6aeed6)
 hash(l::IndexLens, h::UInt) = hash(l.indices, SALT_INDEXLENS + h)
