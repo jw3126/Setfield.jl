@@ -509,6 +509,9 @@ end
     @test @lens($lbc)== lbc
     @test @lens(_.a ∘ $lbc) == @lens(_.a) ∘ lbc
     @test @lens(_.a ∘ $lbc ∘ _[1] ∘ $lbc) == @lens(_.a) ∘ lbc ∘ @lens(_[1]) ∘ lbc
+
+    name = :a
+    @test @lens(_.$name) == @lens(_.a)
 end
 
 end
