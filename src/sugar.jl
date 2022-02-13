@@ -236,6 +236,11 @@ julia> t = ("one", "two")
 
 julia> set(t, (@lens _[1]), "1")
 ("1", "two")
+
+julia> # Indices are always evaluated in external scope; for properties, you can use interpolation:
+       n, i = :a, 10
+       @lens(_.\$n[i, i+1])
+(@lens _.a[10, 11])
 ```
 
 """
