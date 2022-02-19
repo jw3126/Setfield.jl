@@ -509,6 +509,13 @@ end
     @test @lens($lbc)== lbc
     @test @lens(_.a ∘ $lbc) == @lens(_.a) ∘ lbc
     @test @lens(_.a ∘ $lbc ∘ _[1] ∘ $lbc) == @lens(_.a) ∘ lbc ∘ @lens(_[1]) ∘ lbc
+
+    # property interpolation
+    name = :a
+    fancy(name, suffix) = Symbol("fancy_", name, suffix)
+    @test @lens(_.$name) == @lens(_.a)
+    @test @lens(_.x[1, :].$name) == @lens(_.x[1, :].a)
+    @test @lens(_.x[1, :].$(fancy(name, "✨"))) == @lens(_.x[1, :].fancy_a✨)
 end
 
 end
