@@ -26,5 +26,4 @@ for n in names(Setfield, all=true)
         @eval Base.show(io::IO, l::$T) = _show(io, nothing, l)
     end
 end
-
 end

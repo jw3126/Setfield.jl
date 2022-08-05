@@ -21,5 +21,5 @@ Base.@propagate_inbounds function setindex(d0::AbstractDict, v, k)
     return d
 end
 
-setindex(a::StaticArrays.StaticArray, args...) =
+setindex(a::StaticArraysCore.StaticArray, args...) =
     Base.setindex(a, args...)
