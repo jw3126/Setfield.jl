@@ -10,6 +10,7 @@ StaticArraysCore = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
 
 [compat]
 ConstructionBase = "0.1, 1.0"
+StaticArraysCore = "1"
 MacroTools = "0.4.4, 0.5"
 julia = "1.6"
 
