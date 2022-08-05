@@ -1,18 +1,17 @@
 name = "Setfield"
 uuid = "efcf1570-3423-57d1-acb7-fd33fddbac46"
-version = "1.0.0"
+version = "1.1.0"
 
 [deps]
 ConstructionBase = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
 Future = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-Requires = "ae029012-a4dd-5104-9daa-d747884805df"
+StaticArraysCore = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
 
 [compat]
 ConstructionBase = "0.1, 1.0"
 MacroTools = "0.4.4, 0.5"
-Requires = "0.5, 1.0"
-julia = "1"
+julia = "1.6"
 
 [extras]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"

@@ -2,7 +2,7 @@ __precompile__(true)
 module Setfield
 using MacroTools
 using MacroTools: isstructdef, splitstructdef, postwalk
-using Requires: @require
+using StaticArraysCore
 
 if VERSION < v"1.1-"
     using Future: copy!
@@ -26,12 +26,4 @@ for n in names(Setfield, all=true)
         @eval Base.show(io::IO, l::$T) = _show(io, nothing, l)
     end
 end
-
-function __init__()
-    @require StaticArrays="90137ffa-7385-5640-81b9-e52037218182" begin
-        setindex(a::StaticArrays.StaticArray, args...) =
-            Base.setindex(a, args...)
-    end
-end
-
 end
