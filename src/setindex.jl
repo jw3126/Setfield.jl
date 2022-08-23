@@ -3,12 +3,14 @@ Base.@propagate_inbounds function setindex(args...)
 end
 
 Base.@propagate_inbounds function setindex(xs::AbstractArray, v, I...)
-    T = promote_type(eltype(xs), typeof(v))
+    # we need to distinguish between scalar and sliced assignment
+    I_normalized = Base.to_indices(xs, I)
+    T = promote_type(eltype(xs), I_normalized isa Tuple{Vararg{Integer}} ? typeof(v) : eltype(v))
     ys = similar(xs, T)
     if eltype(xs) !== Union{}
         copy!(ys, xs)
     end
-    ys[I...] = v
+    ys[I_normalized...] = v
     return ys
 end
 
