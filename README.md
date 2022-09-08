@@ -8,7 +8,7 @@ Update deeply nested immutable structs.
 
 # Lifecycle
 
-We plan to maintain `Setfield.jl` for a long time (written 2020-09-21, reinforced 2021-08-01). We will however not add new features. For a successor, see [Accessors.jl](https://github.com/JuliaObjects/Accessors.jl).
+We plan to maintain `Setfield.jl` for a long time (written 2020-09-21, reinforced 2021-08-01, 2022-09-08). We will however not add new features. For a successor, see [Accessors.jl](https://github.com/JuliaObjects/Accessors.jl).
 
 # Usage
 Updating deeply nested immutable structs was never easier:
