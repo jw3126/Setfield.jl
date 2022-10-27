@@ -259,3 +259,7 @@ struct FunctionLens{f} <: Lens end
 FunctionLens(f) = FunctionLens{f}()
 
 get(obj, ::FunctionLens{f}) where f = f(obj)
+
+
+Base.hasproperty(obj, l::Setfield.ComposedLens) = hasproperty(obj, l.outer)
+Base.hasproperty(obj, l::PropertyLens{f}) where f = hasproperty(obj, f)
