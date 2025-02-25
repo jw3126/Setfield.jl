@@ -518,4 +518,14 @@ end
     @test @lens(_.x[1, :].$(fancy(name, "✨"))) == @lens(_.x[1, :].fancy_a✨)
 end
 
+@testset "hasproperty" begin
+    obj = (x=1,)
+
+    l1 = @lens _.x
+    l2 = @lens _.y
+
+    @test hasproperty(obj, l1)
+    @test !hasproperty(obj, l2)
+end
+
 end
