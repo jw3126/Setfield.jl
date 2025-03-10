@@ -1,0 +1,48 @@
+\begin{thebibliography}{1}
+
+\bibitem{Julia-2017}
+Jeff Bezanson, Alan Edelman, Stefan Karpinski, and Viral~B Shah.
+Julia: A fresh approach to numerical computing.
+{\em SIAM {R}eview}, 59(1):65--98, 2017.
+
+\bibitem{HaskellLens}
+{Edward Kmett} and contributers.
+{Lens}, 2012.
+https://github.com/ekmett/lens.
+
+\bibitem{JuliaPR21912}
+Keno Fischer.
+{Heap allocated immutable arrays and compiler support}, 2019.
+https://github.com/JuliaLang/julia/pull/21912.
+
+\bibitem{AlgebrasAndUpdateStrategies}
+Michael Johnson, Robert Rosebrugh, and Richard Wood.
+Algebras and update strategies.
+{\em Journal of Universal Computer Science}, 16(5):729--748, 2010.
+The following article appeared in Journal of universal computer science, 16(5),
+  729-748, and can be found at http://dx.doi.org/10.3217/jucs-016-05-0729.
+  Version archived for private and non-commercial use with the permission of
+  the author/s and according to publisher conditions. For further rights please
+  contact the publisher.
+
+\bibitem{ImmutableJS}
+{Lee Bryon} and contributers.
+{Immutable-js}, 2014.
+https://github.com/immutable-js/immutable-js.
+
+\bibitem{ClojureSpecter}
+{Nathan Marz} and contributers.
+{Specter}, 2015.
+https://github.com/redplanetlabs/specter.
+
+\bibitem{riley2018categories}
+Mitchell Riley.
+Categories of optics.
+2018.
+
+\bibitem{SetfieldPackage}
+{Takafumi Arakaki} and {Jan Weidner}.
+{Setfield.jl}, 2017.
+https://github.com/jw3126/Setfield.jl.
+
+\end{thebibliography}
