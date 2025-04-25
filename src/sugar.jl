@@ -65,20 +65,21 @@ const HAS_BEGIN_INDEXING = VERSION ≥ v"1.5.0-DEV.666"
 
 function need_dynamic_lens(ex)
     return foldtree(false, ex) do yes, x
-        (yes || x === :end || (HAS_BEGIN_INDEXING && x === :begin) || x === :_)
+        (yes || x === :end || (HAS_BEGIN_INDEXING && x === :begin) ||
+            x == Expr(:end) || (HAS_BEGIN_INDEXING && x == Expr(:begin)) || x === :_)
     end
 end
 
 function lower_index(collection::Symbol, index, dim)
     if isexpr(index, :call)
         return Expr(:call, lower_index.(collection, index.args, dim)...)
-    elseif (index === :end)
+    elseif (index === :end || index == Expr(:end))
         if dim === nothing
             return :($(Base.lastindex)($collection))
         else
             return :($(Base.lastindex)($collection, $dim))
         end
-    elseif HAS_BEGIN_INDEXING && (index === :begin)
+    elseif HAS_BEGIN_INDEXING && (index === :begin || index == Expr(:begin))
         if dim === nothing
             return :($(Base.firstindex)($collection))
         else
