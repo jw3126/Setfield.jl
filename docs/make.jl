@@ -17,7 +17,6 @@ makedocs(
             "Custom Macros" => "examples/custom_macros.md",
              hide("internals.md"),
             ],
-        strict = true,  # to exit with non-zero code on error
         )
 
 deploydocs(

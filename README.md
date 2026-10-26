@@ -6,9 +6,10 @@
 
 Update deeply nested immutable structs.
 
-# Lifecycle
+# Deprecated
 
-We plan to maintain `Setfield.jl` for a long time (written 2020-09-21, reinforced 2021-08-01, 2022-09-08, 2024-02-15). We will however not add new features. For a successor, see [Accessors.jl](https://github.com/JuliaObjects/Accessors.jl).
+`Setfield.jl` is deprecated. Use [Accessors.jl](https://github.com/JuliaObjects/Accessors.jl) instead.
+It will not receive further updates and supports Julia versions up to 1.13 only.
 
 # Usage
 Updating deeply nested immutable structs was never easier:
