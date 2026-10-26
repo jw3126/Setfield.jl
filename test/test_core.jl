@@ -488,7 +488,8 @@ ConstructionBase.constructorof(::Type{CustomProperties}) = error()
 end
 
 @testset "issue #83" begin
-    @test_throws ArgumentError Setfield.lensmacro(identity, :(_.[:a]))
+    # Julia 1.14 rejects `_.[:a]` when parsing, so build the expression it used to parse to
+    @test_throws ArgumentError Setfield.lensmacro(identity, Expr(:., :_, QuoteNode(Expr(:vect, QuoteNode(:a)))))
 end
 
 @testset "@lens and ∘" begin
