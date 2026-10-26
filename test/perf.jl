@@ -143,8 +143,10 @@ end
     @test b_right.allocs == 0
     @test_broken b_left.allocs == 0
 
-    @test b_left.time > 2b_default.time
-    @test b_right.time ≈ b_default.time rtol=0.8
+    # Julia 1.10 with --check-bounds=no (as used by PerformanceTestTools) makes all variants slow
+    skip_timing = v"1.10" <= VERSION < v"1.11-"
+    @test b_left.time > 2b_default.time skip=skip_timing
+    @test b_right.time ≈ b_default.time rtol=0.8 skip=skip_timing
 end
 
 end
